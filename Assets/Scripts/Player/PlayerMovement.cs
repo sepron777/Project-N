@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
@@ -10,12 +12,17 @@ public class PlayerMovement : MonoBehaviour
     public float runningSpeed = 11.5f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
-    public float lookSpeed = 2.0f;
-    public float lookXLimit = 45.0f;
     private float trunSmoothVeleocity;
     public float smoothTime;
     public GameObject visor;
+    public Transform raycastDown;
+    public Transform raycastFoword;
+    RaycastHit hithitDown;
+    RaycastHit hithitFoword;
     public Transform Visual;
+    public PlayerInput playerInput;
+    private InputAction inputAction;
+    public bool walting;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -32,6 +39,7 @@ public class PlayerMovement : MonoBehaviour
     public void Awake()
     {
         playerCamera = Camera.main;
+        inputAction = playerInput.actions.FindAction("Move");
     }
 
     void Start()
@@ -54,14 +62,19 @@ public class PlayerMovement : MonoBehaviour
         Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
 
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * Input.GetAxis("Horizontal") : 0;
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
+        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
         if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
         {
-            moveDirection.y = jumpSpeed;
+            //moveDirection.y = jumpSpeed;
+            walting = MoundCheck();
+            transform.position = new Vector3(transform.position.x,hithitDown.point.y, transform.position.z);
+            Debug.Log(MoundCheck());
+            Debug.Log(hithitDown.collider.name);
+            Debug.Log(hithitFoword.collider.name);
         }
         else
         {
@@ -73,7 +86,7 @@ public class PlayerMovement : MonoBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
         }
 
-        Vector3 dir = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
+        Vector3 dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
 
         if (dir.magnitude >= 0.1f)
         {
@@ -84,6 +97,19 @@ public class PlayerMovement : MonoBehaviour
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private bool MoundCheck()
+    {
+        bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
+        //nem hit
+        bool hitFoword = Physics.Raycast(Visual.transform.position, Visual.transform.forward, out hithitFoword, 1.5f);
+        if (hitDown && hitFoword)
+        { 
+            return true;
+        }
+
+        return false;
     }
 
     public Camera GetCamera()
