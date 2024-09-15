@@ -72,7 +72,7 @@ public class PlayerMovement : MonoBehaviour
            {
                 playerState = Movement;
                 playerState.OnEnter();
-            }
+           }
         }
         /*
         bool isRunning = false;
