@@ -335,12 +335,21 @@ public class Climbing: PlayerState
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
-        Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
+        Vector3 forward = Visual.transform.TransformDirection(Vector3.forward);
+        Vector3 right = Visual.transform.TransformDirection(Vector3.right);
 
         float curSpeedX = 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+
+        Vector3 dir = (hithitDown.point- Visual.transform.position).normalized;
+
+
+            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+            float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
+        Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
+       
+
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }
