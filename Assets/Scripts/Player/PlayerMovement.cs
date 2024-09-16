@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     public GameObject visor;
     public Transform raycastDown;
     public Transform raycastFoword;
+    public Transform raycastCorner;
     RaycastHit hithitDown;
     RaycastHit hithitFoword;
     public Transform Visual;
@@ -49,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
         Movement = new Movemnt( walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
          Visual, inputAction,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera);
 
-        Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
+        Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword, raycastCorner,
          Visual, inputAction, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera);
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -300,7 +301,9 @@ public class Movemnt : PlayerState
 
 public class Climbing: PlayerState
 {
-    public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
+    private Transform CornerCast;
+    RaycastHit hithitCorner;
+    public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,Transform CornerCast,
     Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera)
     {
         this.walkingSpeed = walkingSpeed;
@@ -311,6 +314,7 @@ public class Climbing: PlayerState
         this.visor = visor;
         this.raycastDown = raycastDown;
         this.raycastFoword = raycastFoword;
+        this.CornerCast = CornerCast;
         this.Visual = Visual;
         this.inputAction = playerInput;
         this.walting = walting;
@@ -342,13 +346,14 @@ public class Climbing: PlayerState
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        Vector3 dir = (hithitDown.point- Visual.transform.position).normalized;
+        CornerCast.localEulerAngles = new Vector3(0,-55* inputAction.ReadValue<Vector2>().x, 0);
 
-
-            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
-            float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
-        Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
-       
+        Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
+        bool hitcorner=  Physics.Raycast(ray,out hithitCorner, 2);
+        if(hitcorner)
+        {
+            Visual.transform.forward = hithitCorner.normal * -1;
+        }
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
@@ -356,9 +361,11 @@ public class Climbing: PlayerState
 
     public override bool CanExit()
     {
+        /*
         bool ground = Physics.Raycast(raycastDown.transform.position, raycastDown.transform.up*-1, out hithitDown,2.5f);
         Debug.DrawRay(raycastDown.transform.position, raycastDown.transform.up * -2.5f,Color.red);
-        return !ground;
+        return !ground;*/
+        return false;
     }
 
     public override void OnEnter()
@@ -366,4 +373,3 @@ public class Climbing: PlayerState
         Debug.Log("ide");
     }
 }
-
