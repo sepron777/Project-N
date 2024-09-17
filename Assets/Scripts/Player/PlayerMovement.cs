@@ -331,7 +331,7 @@ public class Climbing: PlayerState
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
 
-        this.walkingSpeed = 4;
+        this.walkingSpeed = 3;
     }
 
     public override bool CanEnter()
@@ -356,14 +356,20 @@ public class Climbing: PlayerState
 
         CornerCast.localEulerAngles = new Vector3(0,-55 * inputAction.ReadValue<Vector2>().x, 0);
         FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, 0);
-        FowordCast.localPosition = new Vector3(0.5f * inputAction.ReadValue<Vector2>().x, FowordCast.localPosition.y, FowordCast.localPosition.z);
+        //FowordCast.localPosition = new Vector3(0.5f * inputAction.ReadValue<Vector2>().x, FowordCast.localPosition.y, FowordCast.localPosition.z);
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
-        bool hitcorner =  Physics.Raycast(ray,out hithitCorner, 2);
+        bool hitcorner =  Physics.Raycast(ray,out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
         bool hitFoword = Physics.Raycast(ray2, out hithitFoword, 0.4f);
+        Debug.DrawRay(FowordCast.transform.position, FowordCast.forward*0.4f, Color.red);
+
         if (hitFoword)
         {
-            Visual.transform.forward = hithitFoword.normal * -1;
+            if(hithitFoword.normal != lastNormal)
+            {
+                Visual.transform.forward = hithitFoword.normal * -1;
+                lastNormal = hithitFoword.normal;
+            }
         }
         else if (hitcorner)
         {
