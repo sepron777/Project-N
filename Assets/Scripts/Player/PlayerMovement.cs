@@ -66,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
            if(playerState == Movement)
            {
                 playerState = Climbing;
-                playerState.OnEnter();
+                playerState.OnEnter(Movement.GetHeight());
            }
            else
            {
@@ -74,55 +74,6 @@ public class PlayerMovement : MonoBehaviour
                 playerState.OnEnter();
            }
         }
-        /*
-        bool isRunning = false;
-
-        // Press Left Shift to run
-        isRunning = Input.GetKey(KeyCode.LeftShift);
-
-        // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
-        Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
-
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
-        float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-        Debug.Log(characterController.isGrounded);
-        if (Input.GetKeyDown(KeyCode.Space) && canMove && characterController.isGrounded)
-        {
-            moveDirection.y = jumpSpeed;
-            walting = MoundCheck();
-            Teleport();
-            Debug.Log(MoundCheck());
-            Debug.Log(hithitDown.collider.name);
-        }
-        else
-        {
-            if (!walting)
-            {
-                moveDirection.y = movementDirectionY;
-            }
-
-        }
-        
-        if (!characterController.isGrounded && !walting)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-        }
-
-        Vector3 dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
-
-        if (dir.magnitude >= 0.1f)
-        {
-            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + playerCamera.transform.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
-            Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
-        }
-
-        // Move the controller
-        characterController.Move(moveDirection * Time.deltaTime);
-        */
     }
 
     public Camera GetCamera()
@@ -184,6 +135,11 @@ public class PlayerState
     {
 
     }
+
+    public virtual void OnEnter(Vector3 height)
+    {
+
+    }
 }
 
 public class Movemnt : PlayerState
@@ -191,7 +147,7 @@ public class Movemnt : PlayerState
     private bool canExit;
     Transform raycastFoword;
     RaycastHit hithitFoword;
-    public Movemnt(float walkingSpeed, float runningSpeed , float jumpSpeed , float gravity , float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
+    public Movemnt(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
         Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera)
     {
         this.walkingSpeed = walkingSpeed;
@@ -263,12 +219,13 @@ public class Movemnt : PlayerState
     private bool MoundCheck()
     {
         bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
-       
+        Debug.Log(hitDown);
         if (hitDown)
         {
-            raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y, raycastFoword.transform.position.z);
-            Ray ray = new Ray(Visual.transform.position, Visual.transform.forward);
-            bool hitFoword = Physics.Raycast(ray, out hithitFoword, 1.5f);
+            raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y-0.5f, raycastFoword.transform.position.z);
+            Ray ray = new Ray(raycastFoword.transform.position, raycastFoword.transform.forward);
+            bool hitFoword = Physics.Raycast(ray, out hithitFoword, 2f);
+            Debug.Log(hitFoword);
             if (hitFoword)
             {
                 Teleport();
@@ -297,6 +254,11 @@ public class Movemnt : PlayerState
         Debug.Log("ide");
         moveDirection = Vector3.zero;
         canExit = false;
+    }
+
+    public Vector3 GetHeight()
+    {
+        return hithitDown.point;
     }
 }
 
@@ -356,7 +318,6 @@ public class Climbing: PlayerState
 
         CornerCast.localEulerAngles = new Vector3(0,-55 * inputAction.ReadValue<Vector2>().x, 0);
         FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, 0);
-        //FowordCast.localPosition = new Vector3(0.5f * inputAction.ReadValue<Vector2>().x, FowordCast.localPosition.y, FowordCast.localPosition.z);
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
         bool hitcorner =  Physics.Raycast(ray,out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
@@ -389,8 +350,10 @@ public class Climbing: PlayerState
         return false;
     }
 
-    public override void OnEnter()
+    public override void OnEnter(Vector3 height)
     {
         Debug.Log("ide");
+        this.CornerCast.position = new Vector3(CornerCast.position.x, height.y, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, height.y, FowordCast.position.z);
     }
 }
