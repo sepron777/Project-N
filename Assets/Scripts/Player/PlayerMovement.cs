@@ -245,13 +245,12 @@ public class Movemnt : PlayerState
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y-0.5f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
     public override void OnEnter()
     {
-        Debug.Log("ide");
         moveDirection = Vector3.zero;
         canExit = false;
     }
@@ -347,12 +346,37 @@ public class Climbing: PlayerState
         bool ground = Physics.Raycast(raycastDown.transform.position, raycastDown.transform.up*-1, out hithitDown,2.5f);
         Debug.DrawRay(raycastDown.transform.position, raycastDown.transform.up * -2.5f,Color.red);
         return !ground;*/
+        Debug.Log(inputAction.ReadValue<Vector2>().y);
+        if (inputAction.ReadValue<Vector2>().y > 0)
+        {
+            Ray ray = new Ray(raycastDown.transform.position, raycastDown.transform.up * -1);
+            bool down = Physics.Raycast(ray, out hithitDown, 1f);
+            if (down)
+            {
+                characterController.enabled = false;
+                characterController.transform.position = hithitDown.point;
+                characterController.enabled = true;
+                Debug.Log("idk");
+                return true;
+            }
+        }
+        else if (inputAction.ReadValue<Vector2>().y < 0)
+        {
+            Ray ray = new Ray(characterController.transform.position, characterController.transform.up*-1);
+            bool down = characterController.Raycast(ray,out hithitDown,1f);
+            if(down)
+            {
+                characterController.enabled = false;
+                characterController.transform.position = hithitDown.point;
+                characterController.enabled = true;
+                return true;
+            }
+        }
         return false;
     }
 
     public override void OnEnter(Vector3 height)
     {
-        Debug.Log("ide");
         this.CornerCast.position = new Vector3(CornerCast.position.x, height.y, CornerCast.position.z);
         this.FowordCast.position = new Vector3(FowordCast.position.x, height.y, FowordCast.position.z);
     }
