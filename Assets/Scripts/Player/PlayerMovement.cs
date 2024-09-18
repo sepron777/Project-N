@@ -61,19 +61,22 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         playerState.Update();
+        ChenckUpdate(Movement,Climbing);
+        ChenckUpdate(Climbing, Movement);
+        /*
         if (playerState.CanExit())
         {
-           if(playerState == Movement)
-           {
+            if (playerState == Movement)
+            {
                 playerState = Climbing;
-                playerState.OnEnter(Movement.GetHeight());
-           }
-           else
-           {
+                playerState.OnEnter();
+            }
+            else
+            {
                 playerState = Movement;
                 playerState.OnEnter();
-           }
-        }
+            }
+        }*/
     }
 
     public Camera GetCamera()
@@ -84,6 +87,16 @@ public class PlayerMovement : MonoBehaviour
     public PlayerState GetActiveState()
     {
         return playerState;
+    }
+
+    public void ChenckUpdate(PlayerState From, PlayerState To)
+    {
+        if(From != playerState) { return; }
+        if (From.CanExit())
+        {
+            playerState = To;
+            playerState.OnEnter();
+        }
     }
 }
 
@@ -132,11 +145,6 @@ public class PlayerState
     }
 
     public virtual void OnEnter()
-    {
-
-    }
-
-    public virtual void OnEnter(Vector3 height)
     {
 
     }
@@ -225,7 +233,6 @@ public class Movemnt : PlayerState
             raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y-0.5f, raycastFoword.transform.position.z);
             Ray ray = new Ray(raycastFoword.transform.position, raycastFoword.transform.forward);
             bool hitFoword = Physics.Raycast(ray, out hithitFoword, 2f);
-            Debug.Log(hitFoword);
             if (hitFoword)
             {
                 Teleport();
@@ -239,6 +246,7 @@ public class Movemnt : PlayerState
 
     public override bool CanExit()
     {
+        if (!canMove) return false;
         return canExit;
     }
 
@@ -346,24 +354,23 @@ public class Climbing: PlayerState
         bool ground = Physics.Raycast(raycastDown.transform.position, raycastDown.transform.up*-1, out hithitDown,2.5f);
         Debug.DrawRay(raycastDown.transform.position, raycastDown.transform.up * -2.5f,Color.red);
         return !ground;*/
-        Debug.Log(inputAction.ReadValue<Vector2>().y);
-        if (inputAction.ReadValue<Vector2>().y > 0)
+        if (!canMove) return false;
+        if (inputAction.ReadValue<Vector2>().y > 0 && Input.GetKeyDown(KeyCode.Space))
         {
             Ray ray = new Ray(raycastDown.transform.position, raycastDown.transform.up * -1);
-            bool down = Physics.Raycast(ray, out hithitDown, 1f);
+            bool down = Physics.Raycast(ray, out hithitDown, 3f);
             if (down)
             {
                 characterController.enabled = false;
-                characterController.transform.position = hithitDown.point;
+                characterController.transform.position = hithitDown.point+ new Vector3(0,3,0);
                 characterController.enabled = true;
-                Debug.Log("idk");
                 return true;
             }
         }
-        else if (inputAction.ReadValue<Vector2>().y < 0)
+        else if (inputAction.ReadValue<Vector2>().y < 0 && Input.GetKeyDown(KeyCode.Space))
         {
             Ray ray = new Ray(characterController.transform.position, characterController.transform.up*-1);
-            bool down = characterController.Raycast(ray,out hithitDown,1f);
+            bool down = Physics.Raycast(ray,out hithitDown,3f);
             if(down)
             {
                 characterController.enabled = false;
@@ -375,9 +382,10 @@ public class Climbing: PlayerState
         return false;
     }
 
-    public override void OnEnter(Vector3 height)
+    public override void OnEnter()
     {
-        this.CornerCast.position = new Vector3(CornerCast.position.x, height.y, CornerCast.position.z);
-        this.FowordCast.position = new Vector3(FowordCast.position.x, height.y, FowordCast.position.z);
+        Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
+        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y, FowordCast.position.z);
     }
 }
