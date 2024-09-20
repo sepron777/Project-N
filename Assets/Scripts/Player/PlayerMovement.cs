@@ -227,7 +227,6 @@ public class Movemnt : PlayerState
     private bool MoundCheck()
     {
         bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
-        Debug.Log(hitDown);
         if (hitDown)
         {
             raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y-0.5f, raycastFoword.transform.position.z);
@@ -323,17 +322,34 @@ public class Climbing: PlayerState
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        CornerCast.localEulerAngles = new Vector3(0,-55 * inputAction.ReadValue<Vector2>().x, 0);
-        FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, 0);
+        Ray ray3 = new Ray(raycastDown.transform.position, raycastDown.up * -1);
+        bool hitDown = Physics.Raycast(ray3, out hithitDown, 3f);
+        Debug.Log(hitDown);
+        Debug.Log(hithitDown.normal);
+        if (hitDown && Vector2.Distance(characterController.transform.position, hithitDown.point) > 0.1f)
+        {
+            if(characterController.transform.position.y< hithitDown.point.y)
+            {
+                moveDirection.y += hithitDown.point.y;
+            }
+            else
+            {
+                moveDirection.y -= hithitDown.point.y;
+            }
+
+        }
+
+        CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
+        FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
-        bool hitcorner =  Physics.Raycast(ray,out hithitCorner, 1f);
+        bool hitcorner = Physics.Raycast(ray, out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
         bool hitFoword = Physics.Raycast(ray2, out hithitFoword, 0.4f);
-        Debug.DrawRay(FowordCast.transform.position, FowordCast.forward*0.4f, Color.red);
+        Debug.DrawRay(FowordCast.transform.position, FowordCast.forward * 0.4f, Color.red);
 
         if (hitFoword)
         {
-            if(hithitFoword.normal != lastNormal)
+            if (hithitFoword.normal != lastNormal)
             {
                 Visual.transform.forward = hithitFoword.normal * -1;
                 lastNormal = hithitFoword.normal;
@@ -343,6 +359,8 @@ public class Climbing: PlayerState
         {
             Visual.transform.forward = hithitCorner.normal * -1;
         }
+
+
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
@@ -385,7 +403,7 @@ public class Climbing: PlayerState
     public override void OnEnter()
     {
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
-        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y, CornerCast.position.z);
-        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y, FowordCast.position.z);
+        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y - 2f, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 2f, FowordCast.position.z);
     }
 }
