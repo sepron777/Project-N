@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
     public PlayerInput playerInput;
     private InputAction inputAction;
     public bool walting;
+    public Transform orientacion;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -50,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
          Visual, inputAction,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
-         Visual, inputAction, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera);
+         Visual, inputAction, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -276,9 +277,13 @@ public class Climbing: PlayerState
     private Transform FowordCast;
     RaycastHit hithitFoword;
 
-    Vector3 lastNormal;
+    Transform orientacion;
+
+    Vector3 lastFowordNormal;
+    Vector3 lastDownNormal;
+    GameObject tra;
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown,Transform CornerCast,Transform FowordCast,
-    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera)
+    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform orientacion)
     {
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
@@ -298,7 +303,8 @@ public class Climbing: PlayerState
         this.canMove = canMove;
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
-
+        this.orientacion = orientacion;
+        tra = new GameObject();
         this.walkingSpeed = 3;
     }
 
@@ -315,52 +321,76 @@ public class Climbing: PlayerState
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = Visual.transform.TransformDirection(Vector3.forward);
-        Vector3 right = Visual.transform.TransformDirection(Vector3.right);
+        Vector3 forward = orientacion.transform.TransformDirection(Vector3.forward);
+        Vector3 right = orientacion.transform.TransformDirection(Vector3.right);
 
         float curSpeedX = 0;
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
+
+
+        /*
+         if (hitDown && Vector2.Distance(characterController.transform.position, hithitDown.point) > 0.2)
+         {
+             if(characterController.transform.position.y< hithitDown.point.y)
+             {
+                 moveDirection.y += hithitDown.point.y;
+             }
+             else
+             {
+                 moveDirection.y -= hithitDown.point.y;
+             }
+
+         }
+        */
         Ray ray3 = new Ray(raycastDown.transform.position, raycastDown.up * -1);
         bool hitDown = Physics.Raycast(ray3, out hithitDown, 3f);
-        Debug.Log(hitDown);
-        Debug.Log(hithitDown.normal);
-        if (hitDown && Vector2.Distance(characterController.transform.position, hithitDown.point) > 0.1f)
-        {
-            if(characterController.transform.position.y< hithitDown.point.y)
-            {
-                moveDirection.y += hithitDown.point.y;
-            }
-            else
-            {
-                moveDirection.y -= hithitDown.point.y;
-            }
-
-        }
-
         CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
         FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
         bool hitcorner = Physics.Raycast(ray, out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
         bool hitFoword = Physics.Raycast(ray2, out hithitFoword, 0.4f);
-        Debug.DrawRay(FowordCast.transform.position, FowordCast.forward * 0.4f, Color.red);
+        //Debug.DrawRay(FowordCast.transform.position, FowordCast.forward * 0.4f, Color.red);
 
+        //Debug.Log(hitDown);
+        // Debug.Log(hithitFoword.normal);
         if (hitFoword)
         {
-            if (hithitFoword.normal != lastNormal)
+            if (hithitFoword.normal != lastFowordNormal)
             {
                 Visual.transform.forward = hithitFoword.normal * -1;
-                lastNormal = hithitFoword.normal;
+                tra.transform.forward = hithitFoword.normal * -1;
+                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+                lastFowordNormal = hithitFoword.normal;
             }
+
         }
         else if (hitcorner)
         {
+
             Visual.transform.forward = hithitCorner.normal * -1;
+            tra.transform.forward = hithitCorner.normal * -1;
+            orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+            // orientacion.transform.forward = Vector3.Scale((hithitCorner.normal * -1), new Vector3(0, 0, -hithitDown.normal.x * 62.5f));
+
         }
-
-
+        if (hitDown)
+        {
+            if (hithitDown.normal != lastDownNormal)
+            {
+                tra.transform.forward = hithitDown.normal * -1;
+                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+                lastDownNormal = hithitDown.normal;
+            }
+        }
+        /*
+        tra.transform.forward = hithitFoword.normal * -1;
+        orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);*/
+        //orientacion.transform.localEulerAngles = new Vector3(0, hithitFoword.normal.z + 28.1f, -hithitDown.normal.x * 62.5f);
+        //orientacion.transform.forward = hithitFoword.normal * -1;
+        //orientacion.transform.localEulerAngles = new Vector3(0, 0, -hithitDown.normal.x * 62.5f);
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
