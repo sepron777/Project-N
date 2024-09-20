@@ -399,7 +399,6 @@ public class Climbing : PlayerState
     private float Yaxis()
     {
         float y = orientacion.rotation.y;
-        Debug.Log(orientacion.rotation.y);
         if (y < 1)
         {
             return -1;
