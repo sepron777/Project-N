@@ -329,21 +329,6 @@ public class Climbing : PlayerState
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
 
-
-        /*
-         if (hitDown && Vector2.Distance(characterController.transform.position, hithitDown.point) > 0.2)
-         {
-             if(characterController.transform.position.y< hithitDown.point.y)
-             {
-                 moveDirection.y += hithitDown.point.y;
-             }
-             else
-             {
-                 moveDirection.y -= hithitDown.point.y;
-             }
-
-         }
-        */
         Ray ray3 = new Ray(raycastDown.transform.position, raycastDown.up * -1);
         bool hitDown = Physics.Raycast(ray3, out hithitDown, 3f);
         CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
@@ -381,9 +366,10 @@ public class Climbing : PlayerState
         {
             if (hithitDown.normal != lastDownNormal)
             {
-                orientacion.localEulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * -Yaxis() * 62.5f);
+                orientacion.localEulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal)* Yaxis());
                 lastDownNormal = hithitDown.normal;
             }
+           // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
         /*
         tra.transform.forward = hithitFoword.normal * -1;
@@ -398,7 +384,8 @@ public class Climbing : PlayerState
 
     private float Yaxis()
     {
-        float y = orientacion.rotation.y;
+        float y = orientacion.eulerAngles.y;
+        Debug.Log(y);
         if (y < 1)
         {
             return -1;
@@ -445,5 +432,7 @@ public class Climbing : PlayerState
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
         this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y-0.2f, CornerCast.position.z);
         this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y-0.2f, FowordCast.position.z);
+        lastFowordNormal = Vector3.zero;
+        lastDownNormal = Vector3.zero;
     }
 }
