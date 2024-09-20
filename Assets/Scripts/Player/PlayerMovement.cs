@@ -269,7 +269,7 @@ public class Movemnt : PlayerState
     }
 }
 
-public class Climbing: PlayerState
+public class Climbing : PlayerState
 {
     private Transform CornerCast;
     RaycastHit hithitCorner;
@@ -282,8 +282,8 @@ public class Climbing: PlayerState
     Vector3 lastFowordNormal;
     Vector3 lastDownNormal;
     GameObject tra;
-    public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown,Transform CornerCast,Transform FowordCast,
-    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform orientacion)
+    public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
+    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion)
     {
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
@@ -380,8 +380,7 @@ public class Climbing: PlayerState
         {
             if (hithitDown.normal != lastDownNormal)
             {
-                tra.transform.forward = hithitDown.normal * -1;
-                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+                orientacion.localEulerAngles = new Vector3(0, orientacion.localEulerAngles.y, -hithitDown.normal.x * -Yaxis() * 62.5f);
                 lastDownNormal = hithitDown.normal;
             }
         }
@@ -394,6 +393,17 @@ public class Climbing: PlayerState
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private float Yaxis()
+    {
+        float y = orientacion.rotation.y;
+        Debug.Log(orientacion.rotation.y);
+        if (y < 1)
+        {
+            return -1;
+        }
+        return 1;
     }
 
     public override bool CanExit()
@@ -433,7 +443,7 @@ public class Climbing: PlayerState
     public override void OnEnter()
     {
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
-        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y - 2f, CornerCast.position.z);
-        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 2f, FowordCast.position.z);
+        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y-0.2f, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y-0.2f, FowordCast.position.z);
     }
 }
