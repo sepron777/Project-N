@@ -376,11 +376,12 @@ public class Climbing : PlayerState
             // orientacion.transform.forward = Vector3.Scale((hithitCorner.normal * -1), new Vector3(0, 0, -hithitDown.normal.x * 62.5f));
 
         }
+
         if (hitDown)
         {
             if (hithitDown.normal != lastDownNormal)
             {
-                orientacion.localEulerAngles = new Vector3(0, orientacion.localEulerAngles.y, -hithitDown.normal.x * -Yaxis() * 62.5f);
+                orientacion.localEulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * -Yaxis() * 62.5f);
                 lastDownNormal = hithitDown.normal;
             }
         }
