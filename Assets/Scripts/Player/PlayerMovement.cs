@@ -384,9 +384,9 @@ public class Climbing : PlayerState
 
     private float Yaxis()
     {
-        float y = orientacion.eulerAngles.y;
+        float y = orientacion.eulerAngles.y; 
         Debug.Log(y);
-        if (y < 1)
+        if (y < 1 ||y>180)
         {
             return -1;
         }
