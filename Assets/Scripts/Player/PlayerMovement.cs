@@ -331,8 +331,8 @@ public class Climbing : PlayerState
 
         Ray ray3 = new Ray(raycastDown.transform.position, raycastDown.up * -1);
         bool hitDown = Physics.Raycast(ray3, out hithitDown, 3f);
-        CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
-        FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, hithitDown.normal.x * 62.5f);
+        CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, Vector2.Angle(characterController.transform.up, hithitDown.normal));
+        FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, Vector2.Angle(characterController.transform.up, hithitDown.normal));
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
         bool hitcorner = Physics.Raycast(ray, out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
@@ -347,7 +347,7 @@ public class Climbing : PlayerState
             {
                 Visual.transform.forward = hithitFoword.normal * -1;
                 tra.transform.forward = hithitFoword.normal * -1;
-                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitFoword.normal;
             }
 
@@ -357,7 +357,7 @@ public class Climbing : PlayerState
 
             Visual.transform.forward = hithitCorner.normal * -1;
             tra.transform.forward = hithitCorner.normal * -1;
-            orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);
+            orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
             // orientacion.transform.forward = Vector3.Scale((hithitCorner.normal * -1), new Vector3(0, 0, -hithitDown.normal.x * 62.5f));
 
         }
@@ -368,6 +368,7 @@ public class Climbing : PlayerState
             {
                 orientacion.localEulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal)* Yaxis());
                 lastDownNormal = hithitDown.normal;
+                Teleport();
             }
            // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
@@ -380,6 +381,12 @@ public class Climbing : PlayerState
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+    private void Teleport()
+    {
+        characterController.enabled = false;
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.5f, characterController.transform.position.z);
+        characterController.enabled = true;
     }
 
     private float Yaxis()
