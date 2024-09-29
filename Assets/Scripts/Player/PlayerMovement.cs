@@ -64,20 +64,6 @@ public class PlayerMovement : MonoBehaviour
         playerState.Update();
         ChenckUpdate(Movement,Climbing);
         ChenckUpdate(Climbing, Movement);
-        /*
-        if (playerState.CanExit())
-        {
-            if (playerState == Movement)
-            {
-                playerState = Climbing;
-                playerState.OnEnter();
-            }
-            else
-            {
-                playerState = Movement;
-                playerState.OnEnter();
-            }
-        }*/
     }
 
     public Camera GetCamera()
@@ -98,6 +84,21 @@ public class PlayerMovement : MonoBehaviour
             playerState = To;
             playerState.OnEnter();
         }
+    }
+
+    public void ChenckUpdate(PlayerState From, PlayerState To,bool CanGo)
+    {
+        if (From != playerState) { return; }
+        if (CanGo)
+        {
+            playerState = To;
+            playerState.OnEnter();
+        }
+    }
+
+    public void PickUp(GameObject Item)
+    {
+
     }
 }
 
@@ -372,12 +373,6 @@ public class Climbing : PlayerState
             }
            // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
-        /*
-        tra.transform.forward = hithitFoword.normal * -1;
-        orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -hithitDown.normal.x * 62.5f);*/
-        //orientacion.transform.localEulerAngles = new Vector3(0, hithitFoword.normal.z + 28.1f, -hithitDown.normal.x * 62.5f);
-        //orientacion.transform.forward = hithitFoword.normal * -1;
-        //orientacion.transform.localEulerAngles = new Vector3(0, 0, -hithitDown.normal.x * 62.5f);
 
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
