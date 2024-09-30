@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -22,9 +23,11 @@ public class PlayerMovement : MonoBehaviour
     public Transform raycastForward;
     public Transform Visual;
     public PlayerInput playerInput;
-    private InputAction inputAction;
+    private InputAction MoveInput;
+    private InputAction InteractInput;
     public bool walting;
     public Transform orientacion;
+    public Transform PickUpSpot;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -37,6 +40,8 @@ public class PlayerMovement : MonoBehaviour
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
+    public Inventory inventory;
+
     private PlayerState playerState;
     private Movemnt Movement;
     private Climbing Climbing;
@@ -45,13 +50,15 @@ public class PlayerMovement : MonoBehaviour
     public void Awake()
     {
         playerCamera = Camera.main;
-        inputAction = playerInput.actions.FindAction("Move");
+        inventory = GetComponent<Inventory>();
+        MoveInput = playerInput.actions.FindAction("Move");
+        InteractInput = playerInput.actions.FindAction("Interact");
         characterController = GetComponent<CharacterController>();
-        Movement = new Movemnt( walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
-         Visual, inputAction,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera);
+        Movement = new Movemnt(this.gameObject ,walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
+         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
-         Visual, inputAction, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
+         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -94,11 +101,6 @@ public class PlayerMovement : MonoBehaviour
             playerState = To;
             playerState.OnEnter();
         }
-    }
-
-    public void PickUp(GameObject Item)
-    {
-
     }
 }
 
@@ -157,9 +159,13 @@ public class Movemnt : PlayerState
     private bool canExit;
     Transform raycastFoword;
     RaycastHit hithitFoword;
-    public Movemnt(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
-        Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera)
+    private InputAction InteractInput;
+    private Transform PickUpSpot;
+    private GameObject Player;
+    public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
+        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot)
     {
+        this.Player = Player;
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
         this.jumpSpeed = jumpSpeed;
@@ -170,6 +176,7 @@ public class Movemnt : PlayerState
         this.raycastFoword = raycastFoword;
         this.Visual = Visual;
         this.inputAction = playerInput;
+        this.InteractInput = InteractInput;
         this.walting = walting;
         this.characterController = characterController;
         this.moveDirection = moveDirection;
@@ -177,6 +184,29 @@ public class Movemnt : PlayerState
         this.canMove = canMove;
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
+        this.PickUpSpot = PickUpSpot;
+        InteractInput.started += StartedInteract;
+    }
+
+    private void StartedInteract(InputAction.CallbackContext context)
+    {
+        if (Player.GetComponent<PlayerMovement>().inventory.Item != null)
+        {
+            Player.GetComponent<PlayerMovement>().inventory.Drop(PickUpSpot);
+            return;
+        }
+        RaycastHit[] results = new RaycastHit[5];
+        Physics.SphereCastNonAlloc(PickUpSpot.position,1,PickUpSpot.up*-1, results);
+        foreach (RaycastHit item in results)
+        {
+            if(item.collider.TryGetComponent<IInteractable>(out IInteractable component))
+            {
+                component.Interact(Player);
+                return;
+            }
+           // Debug.Log(item.collider.name);
+        }
+       // Debug.Log("idk");
     }
 
     public override bool CanEnter()
@@ -221,7 +251,6 @@ public class Movemnt : PlayerState
             float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
             Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
         }
-
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }
