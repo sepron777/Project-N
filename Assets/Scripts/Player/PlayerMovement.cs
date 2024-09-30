@@ -162,6 +162,7 @@ public class Movemnt : PlayerState
     private InputAction InteractInput;
     private Transform PickUpSpot;
     private GameObject Player;
+    private Inventory inventory;
     public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
         Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot)
     {
@@ -185,14 +186,16 @@ public class Movemnt : PlayerState
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
         this.PickUpSpot = PickUpSpot;
+        inventory = Player.GetComponent<PlayerMovement>().inventory;
         InteractInput.started += StartedInteract;
     }
 
     private void StartedInteract(InputAction.CallbackContext context)
     {
-        if (Player.GetComponent<PlayerMovement>().inventory.Item != null)
+        
+        if (inventory.IsInventoryFull())
         {
-            Player.GetComponent<PlayerMovement>().inventory.Drop(PickUpSpot);
+            inventory.Drop(PickUpSpot);
             return;
         }
         RaycastHit[] results = new RaycastHit[5];
@@ -204,9 +207,7 @@ public class Movemnt : PlayerState
                 component.Interact(Player);
                 return;
             }
-           // Debug.Log(item.collider.name);
         }
-       // Debug.Log("idk");
     }
 
     public override bool CanEnter()
@@ -228,7 +229,7 @@ public class Movemnt : PlayerState
         float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-        if (Input.GetKeyDown(KeyCode.Space) && canMove && characterController.isGrounded)
+        if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
         {
             canExit = MoundCheck();
             moveDirection.y = jumpSpeed;
@@ -257,6 +258,8 @@ public class Movemnt : PlayerState
 
     private bool MoundCheck()
     {
+        if((inventory.IsInventoryFull())) { return false; }
+
         bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
         if (hitDown)
         {

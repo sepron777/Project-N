@@ -1713,9 +1713,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!1 &1616263293
 GameObject:
   m_ObjectHideFlags: 3
@@ -1824,6 +1824,7 @@ GameObject:
   - component: {fileID: 1671861972}
   - component: {fileID: 1671861973}
   - component: {fileID: 1671861974}
+  - component: {fileID: 1671861975}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Untagged
@@ -2004,6 +2005,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemHolder: {fileID: 952565801}
   Item: {fileID: 0}
+--- !u!114 &1671861975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671861966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0f970281f7cfae49a41436ec16d0074, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pushPower: 0.25
 --- !u!1 &1945972037
 GameObject:
   m_ObjectHideFlags: 0
