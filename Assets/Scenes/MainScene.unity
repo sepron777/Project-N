@@ -1582,8 +1582,8 @@ GameObject:
   - component: {fileID: 1454038459}
   - component: {fileID: 1454038458}
   - component: {fileID: 1454038457}
-  - component: {fileID: 1454038456}
   - component: {fileID: 1454038461}
+  - component: {fileID: 1454038462}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1591,18 +1591,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1454038456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1454038455}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 563cca8b25e8997499049e4bddec42d9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &1454038457
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1716,6 +1704,20 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 1
+--- !u!114 &1454038462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1454038455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10e681adde55a434aaa610ba4995c375, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  name: idk
+  weight: 5
 --- !u!1 &1616263293
 GameObject:
   m_ObjectHideFlags: 3
@@ -2005,6 +2007,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemHolder: {fileID: 952565801}
   Item: {fileID: 0}
+  PickUpSpot: {fileID: 2101503019}
 --- !u!114 &1671861975
 MonoBehaviour:
   m_ObjectHideFlags: 0

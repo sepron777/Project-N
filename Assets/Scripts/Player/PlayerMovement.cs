@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction InteractInput;
     public bool walting;
     public Transform orientacion;
+    [HideInInspector]
     public Transform PickUpSpot;
 
     CharacterController characterController;
@@ -51,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     {
         playerCamera = Camera.main;
         inventory = GetComponent<Inventory>();
+        PickUpSpot = inventory.PickUpSpot;
         MoveInput = playerInput.actions.FindAction("Move");
         InteractInput = playerInput.actions.FindAction("Interact");
         characterController = GetComponent<CharacterController>();

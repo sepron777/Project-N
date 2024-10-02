@@ -6,20 +6,19 @@ public class Inventory : MonoBehaviour
 {
     public GameObject ItemHolder;
     public GameObject Item;
+    public Transform PickUpSpot;
     public void Drop(Transform PickUpSpot)
     {
-        RaycastHit hit;
-        bool can =Physics.Raycast(PickUpSpot.position,PickUpSpot.up*-1,out hit,2);
-        if (can)
-        {
-            Item.transform.SetParent(null);
-            Item.GetComponent<BoxCollider>().enabled = true;
-            Item.AddComponent<Rigidbody>();
-            //Item.transform.position = hit.point;
-            Item = null;
-            Debug.Log("ide");
-        }
-        
+        Item.GetComponent<IInteractable>().Drop(PickUpSpot,this);
+    }
+
+    public GameObject GetHoldingItem()
+    {
+        return Item;
+    }
+    public void SetItem(GameObject gm)
+    {
+        Item = gm;
     }
 
     public bool IsInventoryFull()
