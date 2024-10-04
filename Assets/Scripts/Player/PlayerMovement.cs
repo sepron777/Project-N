@@ -90,6 +90,7 @@ public class PlayerMovement : MonoBehaviour
         if(From != playerState) { return; }
         if (From.CanExit())
         {
+            playerState.OnExit();
             playerState = To;
             playerState.OnEnter();
         }
@@ -100,6 +101,7 @@ public class PlayerMovement : MonoBehaviour
         if (From != playerState) { return; }
         if (CanGo)
         {
+            playerState.OnExit();
             playerState = To;
             playerState.OnEnter();
         }
@@ -151,6 +153,11 @@ public class PlayerState
     }
 
     public virtual void OnEnter()
+    {
+
+    }
+
+    public virtual void OnExit()
     {
 
     }
@@ -393,7 +400,6 @@ public class Climbing : PlayerState
             Visual.transform.forward = hithitCorner.normal * -1;
             tra.transform.forward = hithitCorner.normal * -1;
             orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
-            // orientacion.transform.forward = Vector3.Scale((hithitCorner.normal * -1), new Vector3(0, 0, -hithitDown.normal.x * 62.5f));
 
         }
 
@@ -431,10 +437,6 @@ public class Climbing : PlayerState
 
     public override bool CanExit()
     {
-        /*
-        bool ground = Physics.Raycast(raycastDown.transform.position, raycastDown.transform.up*-1, out hithitDown,2.5f);
-        Debug.DrawRay(raycastDown.transform.position, raycastDown.transform.up * -2.5f,Color.red);
-        return !ground;*/
         if (!canMove) return false;
         if (inputAction.ReadValue<Vector2>().y > 0 && Input.GetKeyDown(KeyCode.Space))
         {

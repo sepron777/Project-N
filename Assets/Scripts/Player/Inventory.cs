@@ -9,7 +9,7 @@ public class Inventory : MonoBehaviour
     public Transform PickUpSpot;
     public void Drop(Transform PickUpSpot)
     {
-        Item.GetComponent<IInteractable>().Drop(PickUpSpot,this);
+        Item.GetComponent<ItemBase>().Drop(PickUpSpot,this);
     }
 
     public GameObject GetHoldingItem()
