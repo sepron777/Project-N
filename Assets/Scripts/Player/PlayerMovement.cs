@@ -46,6 +46,7 @@ public class PlayerMovement : MonoBehaviour
     private PlayerState playerState;
     private Movemnt Movement;
     private Climbing Climbing;
+    private WallClimbing WallClimbing;
 
 
     public void Awake()
@@ -62,6 +63,9 @@ public class PlayerMovement : MonoBehaviour
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
          Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
 
+        WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
+         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
@@ -71,8 +75,10 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         playerState.Update();
-        ChenckUpdate(Movement,Climbing);
+        ChenckUpdate(Movement, Climbing);
         ChenckUpdate(Climbing, Movement);
+        ChenckUpdate(Movement, WallClimbing, WallClimbing.CanEnter());
+        Debug.Log(playerState);
     }
 
     public Camera GetCamera()
@@ -491,12 +497,11 @@ public class WallClimbing : PlayerState
     private bool canExit;
     Transform raycastFoword;
     RaycastHit hithitFoword;
-    private InputAction InteractInput;
     private Transform PickUpSpot;
     private GameObject Player;
     private Inventory inventory;
     public WallClimbing(GameObject Player, float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
-        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
+        Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
     {
         this.Player = Player;
         this.walkingSpeed = walkingSpeed;
@@ -509,7 +514,6 @@ public class WallClimbing : PlayerState
         this.raycastFoword = raycastFoword;
         this.Visual = Visual;
         this.inputAction = playerInput;
-        this.InteractInput = InteractInput;
         this.walting = walting;
         this.characterController = characterController;
         this.moveDirection = moveDirection;
@@ -519,31 +523,19 @@ public class WallClimbing : PlayerState
         this.playerCamera = playerCamera;
         this.PickUpSpot = PickUpSpot;
         inventory = Player.GetComponent<PlayerMovement>().inventory;
-        InteractInput.started += StartedInteract;
     }
 
-    private void StartedInteract(InputAction.CallbackContext context)
-    {
-
-        if (inventory.IsInventoryFull())
-        {
-            inventory.Drop(PickUpSpot);
-            return;
-        }
-        RaycastHit[] results = new RaycastHit[5];
-        Physics.SphereCastNonAlloc(PickUpSpot.position, 1, PickUpSpot.up * -1, results);
-        foreach (RaycastHit item in results)
-        {
-            if (item.collider.TryGetComponent<IInteractable>(out IInteractable component))
-            {
-                component.Interact(Player);
-                return;
-            }
-        }
-    }
 
     public override bool CanEnter()
     {
+        Debug.Log("ide");
+        //if (!canMove || inventory.IsInventoryFull()) return false;
+        RaycastHit hit;
+        bool hitt = Physics.Raycast(Visual.transform.position,Visual.transform.forward,out hit,1f);
+        if (hitt && Input.GetKeyDown(KeyCode.Space))
+        {
+            return true;
+        }
         return false;
     }
 
@@ -555,29 +547,12 @@ public class WallClimbing : PlayerState
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
+        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.up);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
         float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
-        float movementDirectionY = moveDirection.y;
+        float curSpeedY = 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-        if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
-        {
-            moveDirection.y = jumpSpeed;
-        }
-        else
-        {
-            moveDirection.y = movementDirectionY;
-        }
 
-        Vector3 dir = new Vector3(inputAction.ReadValue<Vector2>().x, inputAction.ReadValue<Vector2>().y,0).normalized;
-
-        if (dir.magnitude >= 0.1f)
-        {
-            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + playerCamera.transform.eulerAngles.y;
-            float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
-            Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
-        }
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }
