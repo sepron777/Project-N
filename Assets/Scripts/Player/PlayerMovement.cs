@@ -532,7 +532,7 @@ public class WallClimbing : PlayerState
     public override bool CanEnter()
     {
         Debug.Log("ide");
-        //if (!canMove || inventory.IsInventoryFull()) return false;
+        if (!canMove || inventory.IsInventoryFull()) return false;
         RaycastHit hit;
         bool hitt = Physics.Raycast(Visual.transform.position,Visual.transform.forward,out hit,1f);
         if (hitt && Input.GetKeyDown(KeyCode.Space))
@@ -546,11 +546,15 @@ public class WallClimbing : PlayerState
     {
         bool isRunning = false;
 
+        RaycastHit hit;
+        Physics.Raycast(Visual.transform.position, Visual.transform.forward, out hit, 1f);
+        Visual.transform.forward = hit.normal * -1;
+
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
+        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.up);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
         float curSpeedX =0;
         float curSpeedY = 0;
@@ -565,12 +569,12 @@ public class WallClimbing : PlayerState
     public override bool CanExit()
     {
         if (!canMove) return false;
-        if (!Physics.Raycast(raycastFoword.position, raycastFoword.forward, 2f))
+        up = !Physics.Raycast(raycastFoword.position, raycastFoword.forward, 2f);
+        if (up)
         {
-            up = true;
             return true;
         }
-        if (Physics.Raycast(Visual.position, Visual.up * -1, 2f)) 
+        if (Physics.Raycast(Visual.position, Visual.up * -1, 1.5f)) 
         {
             up = false;
             return true;
