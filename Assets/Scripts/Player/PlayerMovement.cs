@@ -5,6 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
@@ -78,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
         ChenckUpdate(Movement, Climbing);
         ChenckUpdate(Climbing, Movement);
         ChenckUpdate(Movement, WallClimbing, WallClimbing.CanEnter());
+        ChenckUpdate(WallClimbing, Movement, WallClimbing.CanExit());
         Debug.Log(playerState);
     }
 
@@ -500,6 +502,7 @@ public class WallClimbing : PlayerState
     private Transform PickUpSpot;
     private GameObject Player;
     private Inventory inventory;
+    private bool up = false;
     public WallClimbing(GameObject Player, float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
         Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
     {
@@ -547,12 +550,12 @@ public class WallClimbing : PlayerState
         isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
-        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.up);
+        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
+        float curSpeedX =0;
         float curSpeedY = 0;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
-
+        moveDirection.y = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }
@@ -562,19 +565,44 @@ public class WallClimbing : PlayerState
     public override bool CanExit()
     {
         if (!canMove) return false;
-        return canExit;
+        if (!Physics.Raycast(raycastFoword.position, raycastFoword.forward, 2f))
+        {
+            up = true;
+            return true;
+        }
+        if (Physics.Raycast(Visual.position, Visual.up * -1, 2f)) 
+        {
+            up = false;
+            return true;
+        }
+        return false;
     }
 
 
     public override void OnEnter()
     {
         moveDirection = Vector3.zero;
+        RaycastHit hit;
+        Physics.Raycast(Visual.transform.position, Visual.transform.forward, out hit, 1f);
+        Visual.transform.forward = hit.normal * -1;
+        characterController.enabled = false;
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hit.point.y + 1, characterController.transform.position.z);
+        characterController.enabled = true;
+        raycastFoword.localPosition = new Vector3(raycastFoword.localPosition.x, 1,raycastFoword.localPosition.z);
         canExit = false;
     }
 
     public override void OnExit()
     {
+        Physics.Raycast(raycastDown.transform.position, raycastDown.up * -1, out hithitDown, 3f);
+        if(up) Teleport();
+    }
 
+    private void Teleport()
+    {
+        characterController.enabled = false;
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y+1, characterController.transform.position.z);
+        characterController.enabled = true;
     }
 }
 
