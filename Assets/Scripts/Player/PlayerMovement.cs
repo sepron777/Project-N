@@ -305,6 +305,11 @@ public class Movemnt : PlayerState
         canExit = false;
     }
 
+    public override void OnExit()
+    {
+
+    }
+
     public Vector3 GetHeight()
     {
         return hithitDown.point;
@@ -473,4 +478,128 @@ public class Climbing : PlayerState
         lastFowordNormal = Vector3.zero;
         lastDownNormal = Vector3.zero;
     }
+
+
+    public override void OnExit()
+    {
+
+    }
 }
+
+public class WallClimbing : PlayerState
+{
+    private bool canExit;
+    Transform raycastFoword;
+    RaycastHit hithitFoword;
+    private InputAction InteractInput;
+    private Transform PickUpSpot;
+    private GameObject Player;
+    private Inventory inventory;
+    public WallClimbing(GameObject Player, float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
+        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
+    {
+        this.Player = Player;
+        this.walkingSpeed = walkingSpeed;
+        this.runningSpeed = runningSpeed;
+        this.jumpSpeed = jumpSpeed;
+        this.gravity = gravity;
+        this.smoothTime = smoothTime;
+        this.visor = visor;
+        this.raycastDown = raycastDown;
+        this.raycastFoword = raycastFoword;
+        this.Visual = Visual;
+        this.inputAction = playerInput;
+        this.InteractInput = InteractInput;
+        this.walting = walting;
+        this.characterController = characterController;
+        this.moveDirection = moveDirection;
+        this.rotationX = rotationX;
+        this.canMove = canMove;
+        this.cameraYOffset = cameraYOffset;
+        this.playerCamera = playerCamera;
+        this.PickUpSpot = PickUpSpot;
+        inventory = Player.GetComponent<PlayerMovement>().inventory;
+        InteractInput.started += StartedInteract;
+    }
+
+    private void StartedInteract(InputAction.CallbackContext context)
+    {
+
+        if (inventory.IsInventoryFull())
+        {
+            inventory.Drop(PickUpSpot);
+            return;
+        }
+        RaycastHit[] results = new RaycastHit[5];
+        Physics.SphereCastNonAlloc(PickUpSpot.position, 1, PickUpSpot.up * -1, results);
+        foreach (RaycastHit item in results)
+        {
+            if (item.collider.TryGetComponent<IInteractable>(out IInteractable component))
+            {
+                component.Interact(Player);
+                return;
+            }
+        }
+    }
+
+    public override bool CanEnter()
+    {
+        return false;
+    }
+
+    public override void Update()
+    {
+        bool isRunning = false;
+
+        // Press Left Shift to run
+        isRunning = Input.GetKey(KeyCode.LeftShift);
+
+        // We are grounded, so recalculate move direction based on axis
+        Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
+        Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
+        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
+        float movementDirectionY = moveDirection.y;
+        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+        if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
+        {
+            moveDirection.y = jumpSpeed;
+        }
+        else
+        {
+            moveDirection.y = movementDirectionY;
+        }
+
+        Vector3 dir = new Vector3(inputAction.ReadValue<Vector2>().x, inputAction.ReadValue<Vector2>().y,0).normalized;
+
+        if (dir.magnitude >= 0.1f)
+        {
+            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + playerCamera.transform.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);
+            Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
+        }
+        // Move the controller
+        characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+
+
+    public override bool CanExit()
+    {
+        if (!canMove) return false;
+        return canExit;
+    }
+
+
+    public override void OnEnter()
+    {
+        moveDirection = Vector3.zero;
+        canExit = false;
+    }
+
+    public override void OnExit()
+    {
+
+    }
+}
+
