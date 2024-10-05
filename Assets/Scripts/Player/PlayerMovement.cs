@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Processors;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -42,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
+    private bool Rope =false;
+
     public Inventory inventory;
 
     private PlayerState playerState;
@@ -65,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
          Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
 
         WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
-         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
+         Visual, MoveInput,InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -78,9 +81,24 @@ public class PlayerMovement : MonoBehaviour
         playerState.Update();
         ChenckUpdate(Movement, Climbing);
         ChenckUpdate(Climbing, Movement);
-        ChenckUpdate(Movement, WallClimbing, WallClimbing.CanEnter());
+        ChenckUpdate(Movement, WallClimbing, CanClimb());
         ChenckUpdate(WallClimbing, Movement, WallClimbing.CanExit());
         Debug.Log(playerState);
+    }
+
+    private bool CanClimb()
+    {
+        if (Rope)
+        {
+            Rope = false;
+            return true;
+        }
+        return false;
+    }
+
+    public void SetRope(bool isRope)
+    {
+        Rope = isRope;
     }
 
     public Camera GetCamera()
@@ -500,11 +518,12 @@ public class WallClimbing : PlayerState
     Transform raycastFoword;
     RaycastHit hithitFoword;
     private Transform PickUpSpot;
+    private InputAction Interact;
     private GameObject Player;
     private Inventory inventory;
     private bool up = false;
     public WallClimbing(GameObject Player, float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
-        Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
+        Transform Visual, InputAction playerInput,InputAction Interact, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform PickUpSpot)
     {
         this.Player = Player;
         this.walkingSpeed = walkingSpeed;
@@ -517,6 +536,7 @@ public class WallClimbing : PlayerState
         this.raycastFoword = raycastFoword;
         this.Visual = Visual;
         this.inputAction = playerInput;
+        this.Interact = Interact;
         this.walting = walting;
         this.characterController = characterController;
         this.moveDirection = moveDirection;
@@ -574,7 +594,7 @@ public class WallClimbing : PlayerState
         {
             return true;
         }
-        if (Physics.Raycast(Visual.position, Visual.up * -1, 1.5f)) 
+        if (Physics.Raycast(Visual.position, Visual.up * -1, 1.3f)) 
         {
             up = false;
             return true;
@@ -587,7 +607,8 @@ public class WallClimbing : PlayerState
     {
         moveDirection = Vector3.zero;
         RaycastHit hit;
-        Physics.Raycast(Visual.transform.position, Visual.transform.forward, out hit, 1f);
+        Vector3 vc = (inventory.GetHoldingItem().transform.position - characterController.transform.position).normalized;
+        Physics.Raycast(Visual.transform.position, vc , out hit, 1f);
         Visual.transform.forward = hit.normal * -1;
         characterController.enabled = false;
         characterController.transform.position = new Vector3(characterController.transform.position.x, hit.point.y + 1, characterController.transform.position.z);
@@ -599,13 +620,14 @@ public class WallClimbing : PlayerState
     public override void OnExit()
     {
         Physics.Raycast(raycastDown.transform.position, raycastDown.up * -1, out hithitDown, 3f);
+        inventory.SetItem(null);
         if(up) Teleport();
     }
 
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y+1, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(hithitDown.point.x, hithitDown.point.y+1f, hithitDown.point.z);
         characterController.enabled = true;
     }
 }
