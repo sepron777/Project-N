@@ -551,14 +551,6 @@ public class WallClimbing : PlayerState
 
     public override bool CanEnter()
     {
-        Debug.Log("ide");
-        if (!canMove || inventory.IsInventoryFull()) return false;
-        RaycastHit hit;
-        bool hitt = Physics.Raycast(Visual.transform.position,Visual.transform.forward,out hit,1f);
-        if (hitt && Input.GetKeyDown(KeyCode.Space))
-        {
-            return true;
-        }
         return false;
     }
 
@@ -588,6 +580,7 @@ public class WallClimbing : PlayerState
 
     public override bool CanExit()
     {
+        
         if (!canMove) return false;
         up = !Physics.Raycast(raycastFoword.position, raycastFoword.forward, 2f);
         if (up)
@@ -606,28 +599,34 @@ public class WallClimbing : PlayerState
     public override void OnEnter()
     {
         moveDirection = Vector3.zero;
+        ClimbingRope climbingRope = inventory.GetHoldingItem().GetComponent<ClimbingRope>();
+        if (Vector3.Distance(Visual.transform.position, climbingRope.top.position)< Vector3.Distance(Visual.transform.position, climbingRope.bottom.position)) 
+        {
+            Teleport(climbingRope.top.position);
+        }
+        else
+        {
+            Teleport(climbingRope.bottom.position);
+        }
+        
         RaycastHit hit;
         Vector3 vc = (inventory.GetHoldingItem().transform.position - characterController.transform.position).normalized;
         Physics.Raycast(Visual.transform.position, vc , out hit, 1f);
         Visual.transform.forward = hit.normal * -1;
-        characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hit.point.y + 1, characterController.transform.position.z);
-        characterController.enabled = true;
         raycastFoword.localPosition = new Vector3(raycastFoword.localPosition.x, 1,raycastFoword.localPosition.z);
-        canExit = false;
     }
 
     public override void OnExit()
     {
         Physics.Raycast(raycastDown.transform.position, raycastDown.up * -1, out hithitDown, 3f);
         inventory.SetItem(null);
-        if(up) Teleport();
+        if(up) Teleport(new Vector3(hithitDown.point.x, hithitDown.point.y + 1f, hithitDown.point.z));
     }
 
-    private void Teleport()
+    private void Teleport(Vector3 newPosition)
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(hithitDown.point.x, hithitDown.point.y+1f, hithitDown.point.z);
+        characterController.transform.position = newPosition;
         characterController.enabled = true;
     }
 }

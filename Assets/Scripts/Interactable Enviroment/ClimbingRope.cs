@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ClimbingRope : MonoBehaviour,IInteractable
 {
+    public Transform bottom;
+    public Transform top;
     // Start is called before the first frame update
     void Start()
     {
