@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
         ChenckUpdate(Climbing, Movement);
         ChenckUpdate(Movement, WallClimbing, CanClimb());
         ChenckUpdate(WallClimbing, Movement, WallClimbing.CanExit());
-        Debug.Log(playerState);
+       // Debug.Log(playerState);
     }
 
     private bool CanClimb()
@@ -405,6 +405,7 @@ public class Climbing : PlayerState
         Ray ray3 = new Ray(raycastDown.transform.position, raycastDown.up * -1);
         bool hitDown = Physics.Raycast(ray3, out hithitDown, 3f);
         CornerCast.localEulerAngles = new Vector3(0, -55 * inputAction.ReadValue<Vector2>().x, Vector2.Angle(characterController.transform.up, hithitDown.normal));
+        CornerCast.localPosition = new Vector3(0.45f* inputAction.ReadValue<Vector2>().x, CornerCast.localPosition.y, CornerCast.localPosition.z);
         FowordCast.localEulerAngles = new Vector3(0, 55 * inputAction.ReadValue<Vector2>().x, Vector2.Angle(characterController.transform.up, hithitDown.normal));
         Ray ray = new Ray(CornerCast.transform.position, CornerCast.forward);
         bool hitcorner = Physics.Raycast(ray, out hithitCorner, 1f);
@@ -427,11 +428,17 @@ public class Climbing : PlayerState
         }
         else if (hitcorner)
         {
-
-            Visual.transform.forward = hithitCorner.normal * -1;
-            tra.transform.forward = hithitCorner.normal * -1;
-            orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
-
+            if (hithitCorner.normal != lastFowordNormal)
+            {
+                Visual.transform.forward = hithitCorner.normal * -1;
+                Debug.Log(hithitCorner.normal);
+                tra.transform.forward = hithitCorner.normal * -1;
+                characterController.enabled = false;
+                characterController.transform.position = new Vector3(hithitCorner.point.x+hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z+ hithitCorner.normal.x*0.4f * inputAction.ReadValue<Vector2>().x);
+                characterController.enabled = true;
+                orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
+                lastFowordNormal = hithitCorner.normal;
+            }
         }
 
         if (hitDown)
