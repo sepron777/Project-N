@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction InteractInput;
     public bool walting;
     public Transform orientacion;
+    public Transform mid;
     [HideInInspector]
     public Transform PickUpSpot;
 
@@ -65,7 +66,7 @@ public class PlayerMovement : MonoBehaviour
          Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
-         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion);
+         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid);
 
         WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
          Visual, MoveInput,InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
@@ -355,8 +356,17 @@ public class Climbing : PlayerState
     Vector3 lastFowordNormal;
     Vector3 lastDownNormal;
     GameObject tra;
+    Transform mid;
+    public Vector3 startPosition;
+    public Vector3 controlPoint; // Mid-point to define the curve
+    public Vector3 targetPosition;
+    public float speed = 1.0f;
+    private float timePassed = 0.0f;
+
+    private bool coner =false;
+
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
-    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion)
+    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid)
     {
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
@@ -377,6 +387,7 @@ public class Climbing : PlayerState
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
         this.orientacion = orientacion;
+        this.mid = mid;
         tra = new GameObject();
         this.walkingSpeed = 3;
     }
@@ -389,6 +400,28 @@ public class Climbing : PlayerState
     public override void Update()
     {
         bool isRunning = false;
+        if (coner)
+        {
+            timePassed += Time.deltaTime * speed;
+
+            // Calculate the percentage of progress (from 0 to 1)
+            float t = Mathf.Clamp01(timePassed);
+
+            // Calculate the Bezier curve position
+            Vector3 bezierPosition = Mathf.Pow(1 - t, 2) * startPosition
+                                     + 2 * (1 - t) * t * controlPoint
+                                     + Mathf.Pow(t, 2) * targetPosition;
+
+            // Move the character along the curve
+            characterController.transform.position = bezierPosition;
+            if (t >= 1.0f)
+            {
+                timePassed = 0.0f; // Reset for looping or another curve
+                characterController.enabled = true;
+                coner = false;
+            }
+            return;
+        }
 
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -430,12 +463,14 @@ public class Climbing : PlayerState
         {
             if (hithitCorner.normal != lastFowordNormal)
             {
+                SaveTransform();
                 Visual.transform.forward = hithitCorner.normal * -1;
                 Debug.Log(hithitCorner.normal);
                 tra.transform.forward = hithitCorner.normal * -1;
                 characterController.enabled = false;
-                characterController.transform.position = new Vector3(hithitCorner.point.x+hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z+ hithitCorner.normal.x*0.4f * inputAction.ReadValue<Vector2>().x);
-                characterController.enabled = true;
+                coner = true;
+                //characterController.transform.position = new Vector3(hithitCorner.point.x+hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z+ hithitCorner.normal.x*0.4f * inputAction.ReadValue<Vector2>().x);
+                //characterController.enabled = true;
                 orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitCorner.normal;
             }
@@ -462,6 +497,20 @@ public class Climbing : PlayerState
         characterController.enabled = true;
     }
 
+    public void SaveTransform()
+    {
+        if(!coner)
+        {
+            startPosition = characterController.transform.position;
+            mid.localPosition = new Vector3( - 0.82f * -inputAction.ReadValue<Vector2>().x, mid.localPosition.y, mid.localPosition.z);
+            controlPoint =mid.position;
+             Vector3 point = new Vector3(hithitCorner.point.x + hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z + hithitCorner.normal.x * 0.4f * inputAction.ReadValue<Vector2>().x);
+            targetPosition = point + hithitCorner.normal*0.5f;
+            Debug.Log("idk");
+        }
+    }
+       
+
     private float Yaxis()
     {
         float y = orientacion.eulerAngles.y; 
@@ -475,7 +524,7 @@ public class Climbing : PlayerState
 
     public override bool CanExit()
     {
-        if (!canMove) return false;
+        if (!canMove && coner) return false;
         if (inputAction.ReadValue<Vector2>().y > 0 && Input.GetKeyDown(KeyCode.Space))
         {
             Ray ray = new Ray(raycastDown.transform.position, raycastDown.transform.up * -1);
