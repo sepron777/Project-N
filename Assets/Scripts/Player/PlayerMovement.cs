@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Processors;
+using UnityEngine.AI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -33,7 +34,10 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector]
     public Transform PickUpSpot;
 
-    CharacterController characterController;
+    [HideInInspector]
+    public NavMeshAgent NavMeshAgent;
+    [HideInInspector]
+    public CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
     float rotationX = 0;
 
@@ -62,6 +66,8 @@ public class PlayerMovement : MonoBehaviour
         MoveInput = playerInput.actions.FindAction("Move");
         InteractInput = playerInput.actions.FindAction("Interact");
         characterController = GetComponent<CharacterController>();
+        NavMeshAgent = GetComponent<NavMeshAgent>();
+        NavMeshAgent.updateRotation = false;
         Movement = new Movemnt(this.gameObject ,walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
          Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot);
 
@@ -132,6 +138,11 @@ public class PlayerMovement : MonoBehaviour
             playerState = To;
             playerState.OnEnter();
         }
+    }
+
+    public void SetMovement(bool canMove)
+    {
+        playerState.canMove = canMove;
     }
 }
 
@@ -228,7 +239,8 @@ public class Movemnt : PlayerState
 
     private void StartedInteract(InputAction.CallbackContext context)
     {
-        
+        if(!canMove)  return;
+
         if (inventory.IsInventoryFull())
         {
             inventory.Drop(PickUpSpot);
@@ -294,7 +306,7 @@ public class Movemnt : PlayerState
 
     private bool MoundCheck()
     {
-        if((inventory.IsInventoryFull())) { return false; }
+        if((inventory.IsInventoryFull()) ||!canMove) { return false; }
 
         bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
         if (hitDown)
@@ -469,8 +481,6 @@ public class Climbing : PlayerState
                 tra.transform.forward = hithitCorner.normal * -1;
                 characterController.enabled = false;
                 coner = true;
-                //characterController.transform.position = new Vector3(hithitCorner.point.x+hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z+ hithitCorner.normal.x*0.4f * inputAction.ReadValue<Vector2>().x);
-                //characterController.enabled = true;
                 orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitCorner.normal;
             }
@@ -506,7 +516,6 @@ public class Climbing : PlayerState
             controlPoint =mid.position;
              Vector3 point = new Vector3(hithitCorner.point.x + hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z + hithitCorner.normal.x * 0.4f * inputAction.ReadValue<Vector2>().x);
             targetPosition = point + hithitCorner.normal*0.5f;
-            Debug.Log("idk");
         }
     }
        

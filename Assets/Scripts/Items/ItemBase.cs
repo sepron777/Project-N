@@ -29,11 +29,6 @@ public class ItemBase : MonoBehaviour, IInteractable
         
     }
 
-    public virtual void Interact()
-    {
-        throw new System.NotImplementedException();
-    }
-
     public virtual void Interact(GameObject Player)
     {
         Debug.Log(gameObject.name + " interact" + Player.name);
