@@ -32,7 +32,13 @@ public class ManHoleCover : MonoBehaviour
         while (Vector3.Distance(Point.position,player.transform.position) > 0.9f)
         {
             Vector3 moveDirection = new Vector3(Point.position.x - player.transform.position.x, player.characterController.transform.position.y, Point.position.z - player.transform.position.z).normalized;
-            player.characterController.Move(moveDirection * Time.deltaTime*2);
+            moveDirection.x *= 3;
+            moveDirection.z *= 3;
+            if (!player.characterController.isGrounded)
+            {
+                moveDirection.y -= 20 * Time.deltaTime;
+            }
+            player.characterController.Move(moveDirection * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
         player.SetMovement(true);
