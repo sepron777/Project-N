@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 
-public class ManHoleCover : MonoBehaviour,IInteractable
+public class ManHoleCover : MonoBehaviour
 {
     public Transform Point;
-    private PlayerMovement plyer;
+    private PlayerMovement player;
     // Start is called before the first frame update
     void Start()
     {
@@ -19,29 +20,21 @@ public class ManHoleCover : MonoBehaviour,IInteractable
         
     }
 
-    public virtual void Interact(GameObject Player)
+    public void Interact(GameObject Player)
     {
-        plyer = Player.GetComponent<PlayerMovement>();
-        plyer.SetMovement(false);
-        StartCoroutine(idk());
+        player = Player.GetComponent<PlayerMovement>();
+        player.SetMovement(false);
+        StartCoroutine(GoToPoint());
     }
 
-    IEnumerator idk()
+    IEnumerator GoToPoint()
     {
-        plyer.NavMeshAgent.enabled = true;
-        plyer.NavMeshAgent.isStopped = false;
-        plyer.NavMeshAgent.SetDestination(Point.position);
-        while (plyer.NavMeshAgent.remainingDistance > plyer.NavMeshAgent.stoppingDistance)
+        while (Vector3.Distance(Point.position,player.transform.position) > 0.9f)
         {
+            Vector3 moveDirection = new Vector3(Point.position.x - player.transform.position.x, player.characterController.transform.position.y, Point.position.z - player.transform.position.z).normalized;
+            player.characterController.Move(moveDirection * Time.deltaTime*2);
             yield return new WaitForFixedUpdate();
         }
-        plyer.NavMeshAgent.isStopped =true;
-        plyer.SetMovement(true);
-        plyer.NavMeshAgent.enabled = false;
-    }
-
-    public virtual void Use()
-    {
-
+        player.SetMovement(true);
     }
 }

@@ -34,8 +34,8 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector]
     public Transform PickUpSpot;
 
-    [HideInInspector]
-    public NavMeshAgent NavMeshAgent;
+    public LayerMask layerMask;
+
     [HideInInspector]
     public CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -66,10 +66,8 @@ public class PlayerMovement : MonoBehaviour
         MoveInput = playerInput.actions.FindAction("Move");
         InteractInput = playerInput.actions.FindAction("Interact");
         characterController = GetComponent<CharacterController>();
-        NavMeshAgent = GetComponent<NavMeshAgent>();
-        NavMeshAgent.updateRotation = false;
         Movement = new Movemnt(this.gameObject ,walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
-         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot);
+         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot, layerMask);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
          Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid);
@@ -210,8 +208,9 @@ public class Movemnt : PlayerState
     private Transform PickUpSpot;
     private GameObject Player;
     private Inventory inventory;
+    private LayerMask LayerMask;
     public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
-        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot)
+        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot,LayerMask layerMask)
     {
         this.Player = Player;
         this.walkingSpeed = walkingSpeed;
@@ -233,6 +232,7 @@ public class Movemnt : PlayerState
         this.cameraYOffset = cameraYOffset;
         this.playerCamera = playerCamera;
         this.PickUpSpot = PickUpSpot;
+        this.LayerMask = layerMask;
         inventory = Player.GetComponent<PlayerMovement>().inventory;
         InteractInput.started += StartedInteract;
     }
@@ -247,7 +247,7 @@ public class Movemnt : PlayerState
             return;
         }
         RaycastHit[] results = new RaycastHit[5];
-        Physics.SphereCastNonAlloc(PickUpSpot.position,1,PickUpSpot.up*-1, results);
+        Physics.SphereCastNonAlloc(PickUpSpot.position,1,PickUpSpot.up*-1, results,Mathf.Infinity, LayerMask, queryTriggerInteraction: QueryTriggerInteraction.Collide);
         foreach (RaycastHit item in results)
         {
             if(item.collider.TryGetComponent<IInteractable>(out IInteractable component))
