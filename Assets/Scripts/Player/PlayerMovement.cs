@@ -142,6 +142,11 @@ public class PlayerMovement : MonoBehaviour
     {
         playerState.canMove = canMove;
     }
+
+    public void SetDirectionVisual(Vector3 vector3)
+    {
+        Movement.dir = vector3;
+    }
 }
 
 public class PlayerState
@@ -209,6 +214,7 @@ public class Movemnt : PlayerState
     private GameObject Player;
     private Inventory inventory;
     private LayerMask LayerMask;
+    public Vector3 dir;
     public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
         Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot,LayerMask layerMask)
     {
@@ -265,6 +271,7 @@ public class Movemnt : PlayerState
 
     public override void Update()
     {
+        //if(!canMove)return;
         bool isRunning = false;
 
         // Press Left Shift to run
@@ -291,10 +298,13 @@ public class Movemnt : PlayerState
         {
             moveDirection.y -= gravity * Time.deltaTime;
         }
+        if (canMove)
+        {
+            dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
+        }
 
-        Vector3 dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
 
-        if (dir.magnitude >= 0.1f)
+        if (dir.magnitude >= 0.1f && canMove)
         {
             float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + playerCamera.transform.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, smoothTime);

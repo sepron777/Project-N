@@ -34,10 +34,7 @@ public class ManHoleCover : MonoBehaviour
             Vector3 moveDirection = new Vector3(Point.position.x - player.transform.position.x, player.characterController.transform.position.y, Point.position.z - player.transform.position.z).normalized;
             moveDirection.x *= 3;
             moveDirection.z *= 3;
-            if (!player.characterController.isGrounded)
-            {
-                moveDirection.y -= 20 * Time.deltaTime;
-            }
+            player.SetDirectionVisual(new Vector3(moveDirection.x,0,moveDirection.z));
             player.characterController.Move(moveDirection * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
