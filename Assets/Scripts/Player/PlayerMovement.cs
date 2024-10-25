@@ -328,13 +328,13 @@ public class Movemnt : PlayerState
             dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
         }
         float runMultyplier = isRunning ? 2 : 1;
-        if (Mathf.Abs(xspeed) > 0.06 ||Mathf.Abs(yspeed) > 0.06)
+        if (characterController.velocity.magnitude>0.05)
         {
             animator.SetFloat("Value", characterController.velocity.magnitude*0.5f/ walkingSpeed * runMultyplier, 0.3f, Time.deltaTime);
         }
         else
         {
-            animator.SetFloat("Value", 0, 0.1f, Time.deltaTime);
+            animator.SetFloat("Value", 0, 0.05f, Time.deltaTime);
         }
 
         if (dir.magnitude >= 0.1f && canMove)
