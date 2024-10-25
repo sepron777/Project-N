@@ -284,8 +284,8 @@ public class Movemnt : PlayerState
 
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
-        xspeed = Mathf.Lerp(xspeed, inputAction.ReadValue<Vector2>().y,3*Time.deltaTime);
-        yspeed = Mathf.Lerp(yspeed, inputAction.ReadValue<Vector2>().x,3*Time.deltaTime);
+        xspeed = Mathf.Lerp(xspeed, inputAction.ReadValue<Vector2>().y, 3 * Time.deltaTime);
+        yspeed = Mathf.Lerp(yspeed, inputAction.ReadValue<Vector2>().x, 3 * Time.deltaTime);
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
@@ -297,16 +297,32 @@ public class Movemnt : PlayerState
         {
             canExit = MoundCheck();
             moveDirection.y = jumpSpeed;
+            animator.SetBool("IsJumping", true);
+            animator.SetBool("IsLanded", false);
         }
         else
         {
             moveDirection.y = movementDirectionY;
         }
-
+     
         if (!characterController.isGrounded)
         {
             moveDirection.y -= gravity * Time.deltaTime;
+            animator.SetBool("IsFalling", true);
+            animator.SetBool("IsLanded", false);
         }
+        else
+        {
+            if (animator.GetBool("IsFalling"))
+            {
+                animator.SetBool("IsJumping", false);
+            }
+
+            animator.SetBool("IsFalling", false);
+            animator.SetBool("IsLanded", true);
+          
+        }
+
         if (canMove)
         {
             dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
