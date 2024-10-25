@@ -52,6 +52,8 @@ public class PlayerMovement : MonoBehaviour
 
     public Inventory inventory;
 
+    private Animator animator;
+
     private PlayerState playerState;
     private Movemnt Movement;
     private Climbing Climbing;
@@ -65,9 +67,10 @@ public class PlayerMovement : MonoBehaviour
         PickUpSpot = inventory.PickUpSpot;
         MoveInput = playerInput.actions.FindAction("Move");
         InteractInput = playerInput.actions.FindAction("Interact");
+        animator = GetComponentInChildren<Animator>();
         characterController = GetComponent<CharacterController>();
         Movement = new Movemnt(this.gameObject ,walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
-         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot, layerMask);
+         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot, layerMask,animator);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
          Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid);
@@ -215,8 +218,11 @@ public class Movemnt : PlayerState
     private Inventory inventory;
     private LayerMask LayerMask;
     public Vector3 dir;
+    private Animator animator;
+    private float xspeed;
+    private float yspeed;
     public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
-        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot,LayerMask layerMask)
+        Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot,LayerMask layerMask, Animator animator)
     {
         this.Player = Player;
         this.walkingSpeed = walkingSpeed;
@@ -239,6 +245,7 @@ public class Movemnt : PlayerState
         this.playerCamera = playerCamera;
         this.PickUpSpot = PickUpSpot;
         this.LayerMask = layerMask;
+        this.animator = animator;
         inventory = Player.GetComponent<PlayerMovement>().inventory;
         InteractInput.started += StartedInteract;
     }
@@ -256,6 +263,7 @@ public class Movemnt : PlayerState
         Physics.SphereCastNonAlloc(PickUpSpot.position,1,PickUpSpot.up*-1, results,Mathf.Infinity, LayerMask, queryTriggerInteraction: QueryTriggerInteraction.Collide);
         foreach (RaycastHit item in results)
         {
+            if(item.collider == null) return;
             if(item.collider.TryGetComponent<IInteractable>(out IInteractable component))
             {
                 component.Interact(Player);
@@ -276,12 +284,13 @@ public class Movemnt : PlayerState
 
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
-
+        xspeed = Mathf.Lerp(xspeed, inputAction.ReadValue<Vector2>().y,3*Time.deltaTime);
+        yspeed = Mathf.Lerp(yspeed, inputAction.ReadValue<Vector2>().x,3*Time.deltaTime);
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().y : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
+        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * xspeed : 0;
+        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * yspeed : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
         if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
@@ -302,7 +311,15 @@ public class Movemnt : PlayerState
         {
             dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
         }
-
+        float runMultyplier = isRunning ? 2 : 1;
+        if (Mathf.Abs(xspeed) > 0.06 ||Mathf.Abs(yspeed) > 0.06)
+        {
+            animator.SetFloat("Value", characterController.velocity.magnitude*0.5f/ walkingSpeed * runMultyplier, 0.3f, Time.deltaTime);
+        }
+        else
+        {
+            animator.SetFloat("Value", 0, 0.1f, Time.deltaTime);
+        }
 
         if (dir.magnitude >= 0.1f && canMove)
         {
