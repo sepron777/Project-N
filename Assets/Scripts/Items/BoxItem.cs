@@ -11,7 +11,7 @@ public class BoxItem : ItemBase
         base.Grab(inventory, PickUpSpot);
         if (inventory.Item != null) return;
         Destroy(GetComponent<Rigidbody>());
-        inventory.Item = this.gameObject;
+        inventory.SetItem(this.gameObject);
         GetComponent<BoxCollider>().enabled = false;
         transform.SetParent(PickUpSpot.transform);
         transform.localPosition = Vector3.zero;

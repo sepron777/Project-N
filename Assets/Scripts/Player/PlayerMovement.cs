@@ -221,6 +221,7 @@ public class Movemnt : PlayerState
     private Animator animator;
     private float xspeed;
     private float yspeed;
+    private bool crouch;
     public Movemnt(GameObject Player,float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform raycastFoword,
         Transform Visual, InputAction playerInput, InputAction InteractInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera,Transform PickUpSpot,LayerMask layerMask, Animator animator)
     {
@@ -289,8 +290,8 @@ public class Movemnt : PlayerState
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * xspeed : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * yspeed : 0;
+        float curSpeedX = canMove ? (isRunning ? (crouch ? walkingSpeed : runningSpeed) : walkingSpeed) * xspeed : 0;
+        float curSpeedY = canMove ? (isRunning ? (crouch ? walkingSpeed : runningSpeed) : walkingSpeed) * yspeed : 0;
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
         if (Input.GetKey(KeyCode.Space) && canMove && characterController.isGrounded)
@@ -317,7 +318,15 @@ public class Movemnt : PlayerState
             {
                 animator.SetBool("IsJumping", false);
             }
+            if (Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                crouch = !crouch;
+                animator.SetBool("IsCrouched", crouch);
+                if (crouch)
+                {
 
+                }
+            }
             animator.SetBool("IsFalling", false);
             animator.SetBool("IsLanded", true);
           
