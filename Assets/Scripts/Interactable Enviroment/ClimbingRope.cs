@@ -27,7 +27,7 @@ public class ClimbingRope : MonoBehaviour,IInteractable
     {
         PlayerMovement pl = Player.GetComponent<PlayerMovement>();
        if(pl.inventory.IsInventoryFull())return;
-        pl.inventory.SetItem(this.gameObject);
+        pl.inventory.SetItem(this.gameObject,false);
         pl.SetRope(true);
     }
 

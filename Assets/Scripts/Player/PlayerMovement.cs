@@ -736,7 +736,7 @@ public class WallClimbing : PlayerState
     public override void OnExit()
     {
         Physics.Raycast(raycastDown.transform.position, raycastDown.up * -1, out hithitDown, 3f);
-        inventory.SetItem(null);
+        inventory.SetItem(null,true);
         if(up) Teleport(new Vector3(hithitDown.point.x, hithitDown.point.y + 1f, hithitDown.point.z));
     }
 
@@ -747,4 +747,3 @@ public class WallClimbing : PlayerState
         characterController.enabled = true;
     }
 }
-

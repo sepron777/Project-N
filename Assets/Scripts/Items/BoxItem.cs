@@ -11,7 +11,7 @@ public class BoxItem : ItemBase
         base.Grab(inventory, PickUpSpot);
         if (inventory.Item != null) return;
         Destroy(GetComponent<Rigidbody>());
-        inventory.SetItem(this.gameObject);
+        inventory.SetItem(this.gameObject,true);
         GetComponent<BoxCollider>().enabled = false;
         transform.SetParent(PickUpSpot.transform);
         transform.localPosition = Vector3.zero;
@@ -39,7 +39,7 @@ public class BoxItem : ItemBase
             inventory.GetHoldingItem().transform.SetParent(null);
             inventory.GetHoldingItem().GetComponent<BoxCollider>().enabled = true;
             inventory.GetHoldingItem().AddComponent<Rigidbody>();
-            inventory.SetItem(null);
+            inventory.SetItem(null,true);
             Debug.Log("ide");
         }
     }

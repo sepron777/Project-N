@@ -8,6 +8,7 @@ public class Inventory : MonoBehaviour
     public GameObject Item;
     public Transform PickUpSpot;
     private Animator animator;
+    private bool canInteract =true;
     private void Awake()
     {
         animator = GetComponentInChildren<Animator>();
@@ -26,18 +27,36 @@ public class Inventory : MonoBehaviour
         return Item;
     }
 
-    public void SetItem(GameObject gm)
+    public void SetItem(GameObject gm,bool withAnimation)
     {
+        if (!canInteract) return;
+        canInteract = false;
         Item = gm;
-        if(Item != null)
+        if(Item != null && withAnimation)
         {
-            animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0.9f);
+            //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0.9f);
+            //StopAllCoroutines();
+            StartCoroutine(Animation(0.9f));
         }
         else
         {
-            animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0f);
+            //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0f);
+            //StopAllCoroutines();
+            StartCoroutine(Animation(0));
         }
+    }
 
+    IEnumerator Animation(float Weight)
+    {
+        float diffrance = (animator.GetLayerWeight(animator.GetLayerIndex("Arms")) < Weight ? 0.1f : -0.1f);
+        Debug.Log(diffrance);
+        while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex("Arms"))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex("Arms")) >= Weight)
+        {
+            animator.SetLayerWeight(animator.GetLayerIndex("Arms"), animator.GetLayerWeight(animator.GetLayerIndex("Arms"))+diffrance);
+            yield return new WaitForFixedUpdate();
+        }
+        Debug.Log("finish");
+        canInteract = true;
     }
 
     public bool IsInventoryFull()
