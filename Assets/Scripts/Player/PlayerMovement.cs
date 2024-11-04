@@ -257,7 +257,7 @@ public class Movemnt : PlayerState
 
         if (inventory.IsInventoryFull())
         {
-            inventory.Drop(PickUpSpot);
+            inventory.Drop();
             return;
         }
         RaycastHit[] results = new RaycastHit[5];

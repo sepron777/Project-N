@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class Inventory : MonoBehaviour
 {
-    public GameObject ItemHolder;
+    public Transform ItemHolder;
     public GameObject Item;
     public Transform PickUpSpot;
-    private Animator animator;
+    public Animator animator;
     private bool canInteract =true;
     private void Awake()
     {
         animator = GetComponentInChildren<Animator>();
     }
 
-    public void Drop(Transform PickUpSpot)
+    public void Drop()
     {
         if(Item.TryGetComponent<ItemBase>(out ItemBase item))
         {
-            item.Drop(PickUpSpot, this);
+            item.Drop(ItemHolder.transform, this);
         }
     }
 
@@ -26,10 +26,18 @@ public class Inventory : MonoBehaviour
     {
         return Item;
     }
+    public Animator GetAnimator()
+    {
+        return animator;
+    }
 
     public bool CanInteract()
     {
         return canInteract;
+    }
+    public void SetInteractSate(bool can)
+    {
+        canInteract = can;
     }
 
     public void SetItem(GameObject gm,bool withAnimation)
