@@ -9,9 +9,9 @@ public class BoxItem : ItemBase
     public override void Grab(Inventory inventory, Transform PickUpSpot)
     {
         base.Grab(inventory, PickUpSpot);
-        if (inventory.Item != null) return;
-        Destroy(GetComponent<Rigidbody>());
+        if (inventory.Item != null || !inventory.CanInteract()) return;
         inventory.SetItem(this.gameObject,true);
+        Destroy(GetComponent<Rigidbody>());
         GetComponent<BoxCollider>().enabled = false;
         transform.SetParent(PickUpSpot.transform);
         transform.localPosition = Vector3.zero;

@@ -27,30 +27,36 @@ public class Inventory : MonoBehaviour
         return Item;
     }
 
+    public bool CanInteract()
+    {
+        return canInteract;
+    }
+
     public void SetItem(GameObject gm,bool withAnimation)
     {
         if (!canInteract) return;
         canInteract = false;
         Item = gm;
-        if(Item != null && withAnimation)
+        if(Item != null)
         {
             //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0.9f);
             //StopAllCoroutines();
-            StartCoroutine(Animation(0.9f));
+            StartCoroutine(Animation(0.9f, withAnimation));
         }
         else
         {
             //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0f);
             //StopAllCoroutines();
-            StartCoroutine(Animation(0));
+            StartCoroutine(Animation(0, withAnimation));
         }
+
     }
 
-    IEnumerator Animation(float Weight)
+    IEnumerator Animation(float Weight,bool withAnimation)
     {
         float diffrance = (animator.GetLayerWeight(animator.GetLayerIndex("Arms")) < Weight ? 0.1f : -0.1f);
         Debug.Log(diffrance);
-        while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex("Arms"))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex("Arms")) >= Weight)
+        while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex("Arms"))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex("Arms")) >= Weight && withAnimation)
         {
             animator.SetLayerWeight(animator.GetLayerIndex("Arms"), animator.GetLayerWeight(animator.GetLayerIndex("Arms"))+diffrance);
             yield return new WaitForFixedUpdate();
