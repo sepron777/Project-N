@@ -714,6 +714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectName: 
   weight: 5
+  AnimationLayerInProgress: 1
   controller: {fileID: 22100000, guid: 407fc27f733d4ab46b58428b9b815d55, type: 2}
 --- !u!54 &352354414
 Rigidbody:
@@ -2685,6 +2686,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectName: 
   weight: 5
+  AnimationLayerInProgress: 0
   controller: {fileID: 22100000, guid: b223f209f57470945a45170ad3a3f737, type: 2}
 --- !u!1 &1616263293
 GameObject:

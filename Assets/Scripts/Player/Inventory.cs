@@ -9,6 +9,7 @@ public class Inventory : MonoBehaviour
     public Transform PickUpSpot;
     public Animator animator;
     private bool canInteract =true;
+    private string animatioLayer;
     private void Awake()
     {
         animator = GetComponentInChildren<Animator>();
@@ -49,24 +50,32 @@ public class Inventory : MonoBehaviour
         {
             //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0.9f);
             //StopAllCoroutines();
-            StartCoroutine(Animation(0.9f, withAnimation));
+            animatioLayer = gm.GetComponent<IAnimation>().Name;
+            StartCoroutine(Animation(0.9f, withAnimation, animatioLayer));
         }
         else
         {
             //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0f);
             //StopAllCoroutines();
-            StartCoroutine(Animation(0, withAnimation));
+            StartCoroutine(Animation(0, withAnimation, animatioLayer));
         }
 
     }
 
-    IEnumerator Animation(float Weight,bool withAnimation)
+    IEnumerator Animation(float Weight,bool withAnimation,string AnimationLayer)
     {
-        float diffrance = (animator.GetLayerWeight(animator.GetLayerIndex("Arms")) < Weight ? 0.1f : -0.1f);
+        float diffrance = (animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer)) < Weight ? 0.1f : -0.1f);
         Debug.Log(diffrance);
-        while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex("Arms"))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex("Arms")) >= Weight && withAnimation)
+        while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer)) >= Weight && withAnimation)
         {
-            animator.SetLayerWeight(animator.GetLayerIndex("Arms"), animator.GetLayerWeight(animator.GetLayerIndex("Arms"))+diffrance);
+            animator.SetLayerWeight(animator.GetLayerIndex(AnimationLayer), animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer))+diffrance);
+            for (int i = 1; i < animator.layerCount; i++)
+            {
+                if (animator.GetLayerName(i) != AnimationLayer)
+                {
+                    animator.SetLayerWeight(i, animator.GetLayerWeight(i)-(diffrance));
+                }
+            }
             yield return new WaitForFixedUpdate();
         }
         Debug.Log("finish");
