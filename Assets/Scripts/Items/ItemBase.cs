@@ -2,17 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemBase : MonoBehaviour, IInteractable , IAnimation
+public class ItemBase : MonoBehaviour, IInteractable , IAnimation, IUse
 {
     public string objectName;
     public int weight;
     public enum Animation {
     Arm,
     Arms,
-    Base
     }
 
     public Animation AnimationLayerInProgress;
+
+    public AnimatorOverrideController controller;
 
     public string Name { get => AnimationLayerInProgress.ToString();}
 
@@ -48,6 +49,6 @@ public class ItemBase : MonoBehaviour, IInteractable , IAnimation
 
     public virtual void Use()
     {
-        throw new System.NotImplementedException();
+
     }
 }

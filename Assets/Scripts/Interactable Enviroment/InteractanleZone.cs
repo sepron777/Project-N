@@ -11,10 +11,4 @@ public class InteractanleZone : MonoBehaviour,IInteractable
     {
         Interacted.Invoke(Player);
     }
-
-    public virtual void Use()
-    {
-
-    }
-
 }

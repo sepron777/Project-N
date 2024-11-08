@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IInteractable
+public interface IUse
 {
-    void Interact(GameObject Player);
+    void Use();
 }

@@ -714,7 +714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectName: 
   weight: 5
-  AnimationLayerInProgress: 1
+  AnimationLayerInProgress: 2
   controller: {fileID: 22100000, guid: 407fc27f733d4ab46b58428b9b815d55, type: 2}
 --- !u!54 &352354414
 Rigidbody:

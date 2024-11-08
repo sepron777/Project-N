@@ -6,7 +6,6 @@ using static UnityEditor.Progress;
 
 public class BoxItem : ItemBase
 {
-    public AnimatorOverrideController controller;
     public override void Grab(Inventory inventory, Transform PickUpSpot)
     {
         base.Grab(inventory, PickUpSpot);

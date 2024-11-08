@@ -84,6 +84,6 @@ public class Inventory : MonoBehaviour
 
     public bool IsInventoryFull()
     {
-        return Item == null?false:true;
+        return Item != null;
     }
 }
