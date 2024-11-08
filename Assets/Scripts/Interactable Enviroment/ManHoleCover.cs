@@ -51,6 +51,16 @@ public class ManHoleCover : MonoBehaviour
             player.characterController.Move(moveDirection * Time.deltaTime);
             yield return new WaitForFixedUpdate();
         }
+
+        dir = Point.forward.normalized;
+        while (Vector3.Angle(player.Visual.transform.forward, dir) > 1.0f)
+        {
+            float tar = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + player.GetCamera().transform.eulerAngles.y;
+            float angle = Mathf.SmoothDampAngle(player.Visual.transform.eulerAngles.y, tar, ref trunSmoothVeleocity, player.smoothTime);
+            player.Visual.transform.rotation = Quaternion.Euler(0, angle, 0);
+            Debug.Log(dir.magnitude);
+            yield return new WaitForFixedUpdate();
+        }
         player.SetMovement(true);
     }
 }
