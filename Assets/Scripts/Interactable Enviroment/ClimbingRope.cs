@@ -18,21 +18,11 @@ public class ClimbingRope : MonoBehaviour,IInteractable
         
     }
 
-    public virtual void Interact()
-    {
-
-    }
-
     public virtual void Interact(GameObject Player)
     {
         PlayerMovement pl = Player.GetComponent<PlayerMovement>();
        if(pl.inventory.IsInventoryFull())return;
         pl.inventory.SetItem(this.gameObject,false);
         pl.SetRope(true);
-    }
-
-    public virtual void Use()
-    {
-
     }
 }

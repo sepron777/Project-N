@@ -51,8 +51,8 @@ public class PlayerMovement : MonoBehaviour
     private bool Rope =false;
 
     public Inventory inventory;
-
-    private Animator animator;
+    [HideInInspector]
+    public Animator animator;
 
     private PlayerState playerState;
     private Movemnt Movement;
@@ -339,11 +339,13 @@ public class Movemnt : PlayerState
         float runMultyplier = isRunning ? 2 : 1;
         if (characterController.velocity.magnitude>0.05)
         {
-            animator.SetFloat("Value", characterController.velocity.magnitude*0.5f/ walkingSpeed * runMultyplier, 0.3f, Time.deltaTime);
+            //animator.SetFloat("Value", characterController.velocity.magnitude*0.5f/ walkingSpeed * runMultyplier, 0.3f, Time.deltaTime);
+            SetAnimatorMovemnt2D(characterController.velocity.magnitude * 0.5f / walkingSpeed * runMultyplier,0.3f);        
         }
         else
         {
-            animator.SetFloat("Value", 0, 0.05f, Time.deltaTime);
+            //animator.SetFloat("Value", 0, 0.05f, Time.deltaTime);
+            SetAnimatorMovemnt2D(0, 0.5f);
         }
 
         if (dir.magnitude >= 0.1f && canMove)
