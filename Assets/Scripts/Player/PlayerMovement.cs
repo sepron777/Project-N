@@ -298,8 +298,8 @@ public class Movemnt : PlayerState
         {
             canExit = MoundCheck();
             moveDirection.y = jumpSpeed;
-            animator.SetBool("IsJumping", true);
-            animator.SetBool("IsLanded", false);
+            SetAnimationJump(true);
+            SetAnimationLand(false);
         }
         else
         {
@@ -309,26 +309,26 @@ public class Movemnt : PlayerState
         if (!characterController.isGrounded)
         {
             moveDirection.y -= gravity * Time.deltaTime;
-            animator.SetBool("IsFalling", true);
-            animator.SetBool("IsLanded", false);
+            SetAnimationFalling(true);
+            SetAnimationLand(false);
         }
         else
         {
             if (animator.GetBool("IsFalling"))
             {
-                animator.SetBool("IsJumping", false);
+                SetAnimationJump(false);
             }
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
                 crouch = !crouch;
-                animator.SetBool("IsCrouched", crouch);
+                SetAnimationCrouch(crouch);
                 if (crouch)
                 {
-
+                    //something here
                 }
             }
-            animator.SetBool("IsFalling", false);
-            animator.SetBool("IsLanded", true);
+            SetAnimationFalling(false);
+            SetAnimationLand(true);
           
         }
 
@@ -354,6 +354,36 @@ public class Movemnt : PlayerState
         }
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private void SetAnimationJump(bool isTrue)
+    {
+        if (!canMove) return;
+        animator.SetBool("IsJumping", isTrue);
+    }
+
+    private void SetAnimationLand(bool isTrue)
+    {
+        if (!canMove) return;
+        animator.SetBool("IsLanded", isTrue);
+    }
+
+    private void SetAnimationFalling(bool isTrue)
+    {
+        if (!canMove) return;
+        animator.SetBool("IsFalling", isTrue);
+    }
+
+    private void SetAnimationCrouch(bool isTrue)
+    {
+        if (!canMove) return;
+        animator.SetBool("IsCrouched", isTrue);
+    }
+    //este neviem ci to treba
+    private void SetAnimatorMovemnt2D(float Value,float DampTime)
+    {
+        if (!canMove) return;
+        animator.SetFloat("Value", Value, DampTime, Time.deltaTime);
     }
 
     private bool MoundCheck()
