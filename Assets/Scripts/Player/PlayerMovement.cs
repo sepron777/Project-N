@@ -418,7 +418,7 @@ public class Movemnt : PlayerState
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y-0.5f, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y-0.3f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
@@ -510,6 +510,8 @@ public class Climbing : PlayerState
 
             // Move the character along the curve
             characterController.transform.position = bezierPosition;
+            Visual.transform.forward =  Vector3.Lerp(Visual.transform.forward, hithitCorner.normal * -1, 0.05f);
+            
             if (t >= 1.0f)
             {
                 timePassed = 0.0f; // Reset for looping or another curve
@@ -560,7 +562,7 @@ public class Climbing : PlayerState
             if (hithitCorner.normal != lastFowordNormal)
             {
                 SaveTransform();
-                Visual.transform.forward = hithitCorner.normal * -1;
+                //Visual.transform.forward = hithitCorner.normal * -1;
                 Debug.Log(hithitCorner.normal);
                 tra.transform.forward = hithitCorner.normal * -1;
                 characterController.enabled = false;
@@ -587,7 +589,7 @@ public class Climbing : PlayerState
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.5f, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.3f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
@@ -599,7 +601,7 @@ public class Climbing : PlayerState
             mid.localPosition = new Vector3( - 0.82f * -inputAction.ReadValue<Vector2>().x, mid.localPosition.y, mid.localPosition.z);
             controlPoint =mid.position;
              Vector3 point = new Vector3(hithitCorner.point.x + hithitCorner.normal.z * 0.4f * -inputAction.ReadValue<Vector2>().x, characterController.transform.position.y, hithitCorner.point.z + hithitCorner.normal.x * 0.4f * inputAction.ReadValue<Vector2>().x);
-            targetPosition = point + hithitCorner.normal*0.5f;
+            targetPosition = point + hithitCorner.normal*0.3f;
         }
     }
        
