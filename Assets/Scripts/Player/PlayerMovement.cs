@@ -9,6 +9,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Processors;
 using UnityEngine.AI;
+using UnityEngine.XR;
+using UnityEngine.Animations.Rigging;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -31,6 +33,16 @@ public class PlayerMovement : MonoBehaviour
     public bool walting;
     public Transform orientacion;
     public Transform mid;
+
+    public Rig ArmsRig;
+    [Header("R hand")]
+    public Transform RHand;
+    public Transform RHandraycast;
+
+    [Header("L hand")]
+    public Transform LHand;
+    public Transform LHandraycast;
+
     [HideInInspector]
     public Transform PickUpSpot;
 
@@ -73,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
          Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot, layerMask,animator);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
-         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid);
+         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid, RHand, RHandraycast, LHand, LHandraycast, ArmsRig);
 
         WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
          Visual, MoveInput,InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
@@ -449,6 +461,18 @@ public class Climbing : PlayerState
 
     Transform orientacion;
 
+    Transform RHand;
+    Transform RHandraycast;
+    Vector3 RHandPos;
+    RaycastHit RightHandhit;
+
+    Transform LHand;
+    Transform LHandraycast;
+    Vector3 LHandPos;
+    RaycastHit LightHandhit;
+
+    Rig ArmsRig;
+
     Vector3 lastFowordNormal;
     Vector3 lastDownNormal;
     GameObject tra;
@@ -462,7 +486,7 @@ public class Climbing : PlayerState
     private bool coner =false;
 
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
-    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid)
+    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid,Transform RHand, Transform RHandraycast, Transform LHand,Transform LHandraycast, Rig ArmsRig)
     {
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
@@ -484,6 +508,11 @@ public class Climbing : PlayerState
         this.playerCamera = playerCamera;
         this.orientacion = orientacion;
         this.mid = mid;
+        this.RHand = RHand;
+        this.RHandraycast = RHandraycast;
+        this.LHand = LHand;
+        this.LHandraycast = LHandraycast;
+        this.ArmsRig = ArmsRig;
         tra = new GameObject();
         this.walkingSpeed = 3;
     }
@@ -496,6 +525,32 @@ public class Climbing : PlayerState
     public override void Update()
     {
         bool isRunning = false;
+        RHand.transform.position = RHandPos;
+        Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
+        bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
+        if (RightHand)
+        {
+            if (Vector3.Distance(RHandPos, RightHandhit.point) >0.2f)
+            {
+                RHand.transform.up = Visual.transform.forward;
+                RHand.transform.position = RightHandhit.point;
+                RHandPos = RightHandhit.point;
+            }
+        }
+
+        LHand.transform.position = LHandPos;
+        Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
+        bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
+        if (LightHand)
+        {
+            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.2f)
+            {
+                LHand.transform.up = Visual.transform.forward;
+                LHand.transform.position = LightHandhit.point;
+                LHandPos = LightHandhit.point;
+            }
+        }
+
         if (coner)
         {
             timePassed += Time.deltaTime * speed;
@@ -555,7 +610,6 @@ public class Climbing : PlayerState
                 orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, -Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitFoword.normal;
             }
-
         }
         else if (hitcorner)
         {
@@ -649,9 +703,16 @@ public class Climbing : PlayerState
 
     public override void OnEnter()
     {
+        ArmsRig.weight = 1.0f;
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
         this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y-0.2f, CornerCast.position.z);
         this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y-0.2f, FowordCast.position.z);
+        Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
+        bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
+        if(RightHand) RHandPos = RightHandhit.point;
+        Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
+        bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
+        if (LightHand) LHandPos = LightHandhit.point;
         lastFowordNormal = Vector3.zero;
         lastDownNormal = Vector3.zero;
     }
@@ -659,7 +720,7 @@ public class Climbing : PlayerState
 
     public override void OnExit()
     {
-
+        ArmsRig.weight = 0f;
     }
 }
 
