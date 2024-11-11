@@ -471,6 +471,8 @@ public class Climbing : PlayerState
     Vector3 LHandPos;
     RaycastHit LightHandhit;
 
+    bool lHandMove = false;
+
     Rig ArmsRig;
 
     Vector3 lastFowordNormal;
@@ -525,28 +527,26 @@ public class Climbing : PlayerState
     public override void Update()
     {
         bool isRunning = false;
-        RHand.transform.position = RHandPos;
+
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
+        RHand.transform.position = Vector3.Lerp(RHand.transform.position, RHandPos, 10f*Time.deltaTime);
         if (RightHand)
         {
-            if (Vector3.Distance(RHandPos, RightHandhit.point) >0.2f)
+            if (Vector3.Distance(RHand.transform.position, RightHandhit.point) > 0.3f)
             {
-                RHand.transform.up = Visual.transform.forward;
-                RHand.transform.position = RightHandhit.point;
+                RHand.transform.localEulerAngles = new Vector3(90, 0, 0);
                 RHandPos = RightHandhit.point;
             }
         }
-
-        LHand.transform.position = LHandPos;
+        LHand.transform.position = Vector3.Lerp(LHand.transform.position, LHandPos, 10f * Time.deltaTime);
         Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
         bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
         if (LightHand)
         {
-            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.2f)
+            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.3f)
             {
-                LHand.transform.up = Visual.transform.forward;
-                LHand.transform.position = LightHandhit.point;
+                LHand.transform.localEulerAngles = new Vector3(90,0,0);
                 LHandPos = LightHandhit.point;
             }
         }
