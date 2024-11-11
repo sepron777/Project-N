@@ -530,23 +530,23 @@ public class Climbing : PlayerState
 
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
-        RHand.transform.position = Vector3.Lerp(RHand.transform.position, RHandPos, 10f*Time.deltaTime);
+        RHand.transform.position = Vector3.Lerp(RHand.transform.position, RHandPos, 15f*Time.deltaTime);
         if (RightHand)
         {
-            if (Vector3.Distance(RHand.transform.position, RightHandhit.point) > 0.3f)
+            if (Vector3.Distance(RHand.transform.position, RightHandhit.point) > 0.2f)
             {
-                RHand.transform.localEulerAngles = new Vector3(90, 0, 0);
+                RHand.transform.localEulerAngles = new Vector3(90, -90, -90);
                 RHandPos = RightHandhit.point;
             }
         }
-        LHand.transform.position = Vector3.Lerp(LHand.transform.position, LHandPos, 10f * Time.deltaTime);
         Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
         bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
+        LHand.transform.position = Vector3.Lerp(LHand.transform.position, LHandPos, 15f * Time.deltaTime);
         if (LightHand)
         {
-            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.3f)
+            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.2f)
             {
-                LHand.transform.localEulerAngles = new Vector3(90,0,0);
+                LHand.transform.localEulerAngles = new Vector3(90,-90,-90);
                 LHandPos = LightHandhit.point;
             }
         }
@@ -597,10 +597,7 @@ public class Climbing : PlayerState
         bool hitcorner = Physics.Raycast(ray, out hithitCorner, 1f);
         Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
         bool hitFoword = Physics.Raycast(ray2, out hithitFoword, 0.4f);
-        //Debug.DrawRay(FowordCast.transform.position, FowordCast.forward * 0.4f, Color.red);
 
-        //Debug.Log(hitDown);
-        // Debug.Log(hithitFoword.normal);
         if (hitFoword)
         {
             if (hithitFoword.normal != lastFowordNormal)
