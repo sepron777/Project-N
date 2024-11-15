@@ -531,7 +531,7 @@ public class Climbing : PlayerState
         RhandPosition.name = "RightHandRealTimePostion";
         LhandPosition = new GameObject();
         LhandPosition.name = "LeftHandRealTimePostion";
-        this.walkingSpeed = 3;
+        this.walkingSpeed = 1;
     }
 
     public override bool CanEnter()
