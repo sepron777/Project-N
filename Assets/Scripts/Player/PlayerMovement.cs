@@ -297,8 +297,8 @@ public class Movemnt : PlayerState
 
         // Press Left Shift to run
         isRunning = Input.GetKey(KeyCode.LeftShift);
-        xspeed = Mathf.Lerp(xspeed, inputAction.ReadValue<Vector2>().y, 3 * Time.deltaTime);
-        yspeed = Mathf.Lerp(yspeed, inputAction.ReadValue<Vector2>().x, 3 * Time.deltaTime);
+        xspeed = Mathf.Lerp(xspeed, inputAction.ReadValue<Vector2>().y, 5 * Time.deltaTime);
+        yspeed = Mathf.Lerp(yspeed, inputAction.ReadValue<Vector2>().x, 5 * Time.deltaTime);
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = playerCamera.transform.TransformDirection(Vector3.forward);
         Vector3 right = playerCamera.transform.TransformDirection(Vector3.right);
@@ -349,7 +349,7 @@ public class Movemnt : PlayerState
             dir = new Vector3(inputAction.ReadValue<Vector2>().x, 0, inputAction.ReadValue<Vector2>().y).normalized;
         }
         float runMultyplier = isRunning ? 2 : 1;
-        if (characterController.velocity.magnitude>0.05)
+        if (Mathf.Abs(xspeed) >0.05 || Mathf.Abs(yspeed) > 0.05)
         {
             //animator.SetFloat("Value", characterController.velocity.magnitude*0.5f/ walkingSpeed * runMultyplier, 0.3f, Time.deltaTime);
             SetAnimatorMovemnt2D(characterController.velocity.magnitude * 0.5f / walkingSpeed * runMultyplier,0.3f);        
@@ -465,13 +465,24 @@ public class Climbing : PlayerState
     Transform RHandraycast;
     Vector3 RHandPos;
     RaycastHit RightHandhit;
+    GameObject RhandPosition;
+    private float tRhand = 0.0f;
+    private Vector3 startPositionRHand;
+    private Vector3 endPositionRHand;
+    private bool isMovingRHand = false;
+    float RHandDistance = 0.3f;
+
 
     Transform LHand;
     Transform LHandraycast;
     Vector3 LHandPos;
     RaycastHit LightHandhit;
-
-    bool lHandMove = false;
+    GameObject LhandPosition;
+    private float tLhand = 0.0f;
+    private Vector3 startPositionLHand;
+    private Vector3 endPositionLHand;
+    private bool isMovingLHand = false;
+    float LHandDistance = 0.3f;
 
     Rig ArmsRig;
 
@@ -516,6 +527,10 @@ public class Climbing : PlayerState
         this.LHandraycast = LHandraycast;
         this.ArmsRig = ArmsRig;
         tra = new GameObject();
+        RhandPosition = new GameObject();
+        RhandPosition.name = "RightHandRealTimePostion";
+        LhandPosition = new GameObject();
+        LhandPosition.name = "LeftHandRealTimePostion";
         this.walkingSpeed = 3;
     }
 
@@ -527,28 +542,98 @@ public class Climbing : PlayerState
     public override void Update()
     {
         bool isRunning = false;
-
-        Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
-        bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
-        RHand.transform.position = Vector3.Lerp(RHand.transform.position, RHandPos, 15f*Time.deltaTime);
-        if (RightHand)
+        RhandPosition.transform.position = RHand.transform.position;
+        Ray rayRightHand = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
+        bool RightHand = Physics.Raycast(rayRightHand, out RightHandhit, 3f);
+        // If we detect a hit and not already moving, start the arc motion
+        if (RightHand && !isMovingRHand)
         {
-            if (Vector3.Distance(RHand.transform.position, RightHandhit.point) > 0.2f)
+            if (Vector3.Distance(RhandPosition.transform.position, RightHandhit.point) > RHandDistance && !isMovingLHand)
             {
                 RHand.transform.localEulerAngles = new Vector3(90, -90, -90);
-                RHandPos = RightHandhit.point;
+                startPositionRHand = RhandPosition.transform.position;
+                endPositionRHand = RightHandhit.point;
+                isMovingRHand = true;
+                tRhand = 0.0f; // Reset t to start the movement
+            }
+            else if (Vector3.Distance(RhandPosition.transform.position, RightHandhit.point) < RHandDistance)
+            {
+                RHand.transform.position = RHandPos;
             }
         }
-        Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
-        bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
-        LHand.transform.position = Vector3.Lerp(LHand.transform.position, LHandPos, 15f * Time.deltaTime);
-        if (LightHand)
+
+        // If moving, proceed with the arc motion
+        if (isMovingRHand)
         {
-            if (Vector3.Distance(LHandPos, LightHandhit.point) > 0.2f)
+            // Increment t based on speed
+            float speed = 5f; // Adjust for desired speed
+            tRhand += speed * Time.deltaTime;
+            tRhand = Mathf.Clamp01(tRhand);
+
+            // Calculate the horizontal position along the straight line
+            Vector3 linearPosition = Vector3.Lerp(startPositionRHand, endPositionRHand, tRhand);
+
+            // Calculate a vertical offset using a sine wave for the arc effect
+            float arcHeight = 0.2f; // Adjust for desired arc height
+            float heightOffset = Mathf.Sin(tRhand * Mathf.PI) * arcHeight;
+
+            // Add the height offset to create the arc
+            Vector3 archedPosition = new Vector3(linearPosition.x, linearPosition.y + heightOffset, linearPosition.z);
+            RHand.transform.position = archedPosition;
+            if (tRhand >= 1.0f)
             {
-                LHand.transform.localEulerAngles = new Vector3(90,-90,-90);
-                LHandPos = LightHandhit.point;
+                tRhand = 0.0f; // Reset for looping or another curve
+                RHandPos = RhandPosition.transform.position;
+                isMovingRHand = false;
             }
+
+        }
+
+        LhandPosition.transform.position = LHand.transform.position;
+        Ray rayLightHand = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
+        bool LightHand = Physics.Raycast(rayLightHand, out LightHandhit, 3f);
+        // If we detect a hit and not already moving, start the arc motion
+        if (LightHand && !isMovingLHand)
+        {
+            if (Vector3.Distance(LhandPosition.transform.position, LightHandhit.point) > LHandDistance && !isMovingRHand)
+            {
+                LHand.transform.localEulerAngles = new Vector3(90, -90, -90);
+                startPositionLHand = LhandPosition.transform.position;
+                endPositionLHand = LightHandhit.point;
+                isMovingLHand = true;
+                tLhand = 0.0f; // Reset t to start the movement
+            }
+            else if (Vector3.Distance(LhandPosition.transform.position, LightHandhit.point) < LHandDistance)
+            {
+                LHand.transform.position = LHandPos;
+            }
+        }
+
+        // If moving, proceed with the arc motion
+        if (isMovingLHand)
+        {
+            // Increment t based on speed
+            float speed = 5f; // Adjust for desired speed
+            tLhand += speed * Time.deltaTime;
+            tLhand = Mathf.Clamp01(tLhand);
+
+            // Calculate the horizontal position along the straight line
+            Vector3 linearPosition = Vector3.Lerp(startPositionLHand, endPositionLHand, tLhand);
+
+            // Calculate a vertical offset using a sine wave for the arc effect
+            float arcHeight = 0.2f; // Adjust for desired arc height
+            float heightOffset = Mathf.Sin(tLhand * Mathf.PI) * arcHeight;
+
+            // Add the height offset to create the arc
+            Vector3 archedPosition = new Vector3(linearPosition.x, linearPosition.y + heightOffset, linearPosition.z);
+            LHand.transform.position = archedPosition;
+            if (tLhand >= 1.0f)
+            {
+                tLhand = 0.0f; // Reset for looping or another curve
+                LHandPos = LhandPosition.transform.position;
+                isMovingLHand = false;
+            }
+
         }
 
         if (coner)
@@ -584,7 +669,8 @@ public class Climbing : PlayerState
         Vector3 right = orientacion.transform.TransformDirection(Vector3.right);
 
         float curSpeedX = 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputAction.ReadValue<Vector2>().x : 0;
+        float curSpeedY = canMove ? walkingSpeed * inputAction.ReadValue<Vector2>().x : 0;
+        curSpeedY = isMovingRHand || isMovingLHand ? 0 : curSpeedY;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
 

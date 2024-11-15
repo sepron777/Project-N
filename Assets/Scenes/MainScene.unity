@@ -3154,6 +3154,7 @@ MonoBehaviour:
   mid: {fileID: 1918951722}
   ArmsRig: {fileID: 290073546}
   RHand: {fileID: 1624916970}
+  RHandTipBone: {fileID: 1852576807101828299}
   RHandraycast: {fileID: 336585593}
   LHand: {fileID: 1956360598}
   LHandraycast: {fileID: 1333183582}
