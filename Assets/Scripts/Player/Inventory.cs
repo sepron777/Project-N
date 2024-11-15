@@ -50,7 +50,7 @@ public class Inventory : MonoBehaviour
         {
             //animator.SetLayerWeight(animator.GetLayerIndex("Arms"), 0.9f);
             //StopAllCoroutines();
-            animatioLayer = gm.GetComponent<IAnimation>().Name;
+            animatioLayer = gm.GetComponent<IAnimation>()?.Name;
             StartCoroutine(Animation(0.9f, withAnimation, animatioLayer));
         }
         else
