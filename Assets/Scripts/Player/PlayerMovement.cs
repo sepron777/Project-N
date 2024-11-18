@@ -60,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
-    private bool Rope =false;
+    private bool Rope = false;
 
     public Inventory inventory;
     [HideInInspector]
@@ -81,14 +81,14 @@ public class PlayerMovement : MonoBehaviour
         InteractInput = playerInput.actions.FindAction("Interact");
         animator = GetComponentInChildren<Animator>();
         characterController = GetComponent<CharacterController>();
-        Movement = new Movemnt(this.gameObject ,walkingSpeed,  runningSpeed,  jumpSpeed,  gravity,  trunSmoothVeleocity,  smoothTime,  visor,  raycastDown,  raycastFoword,
-         Visual, MoveInput,InteractInput,  walting,  characterController,  moveDirection,  rotationX,  canMove,  cameraYOffset,  playerCamera, PickUpSpot, layerMask,animator);
+        Movement = new Movemnt(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
+         Visual, MoveInput, InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot, layerMask, animator);
 
         Climbing = new Climbing(walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastCorner, raycastForward,
-         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion,mid, RHand, RHandraycast, LHand, LHandraycast, ArmsRig);
+         Visual, MoveInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, orientacion, mid, RHand, RHandraycast, LHand, LHandraycast, ArmsRig,animator);
 
         WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
-         Visual, MoveInput,InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
+         Visual, MoveInput, InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -103,7 +103,7 @@ public class PlayerMovement : MonoBehaviour
         ChenckUpdate(Climbing, Movement);
         ChenckUpdate(Movement, WallClimbing, CanClimb());
         ChenckUpdate(WallClimbing, Movement, WallClimbing.CanExit());
-       // Debug.Log(playerState);
+        // Debug.Log(playerState);
     }
 
     private bool CanClimb()
@@ -133,7 +133,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void ChenckUpdate(PlayerState From, PlayerState To)
     {
-        if(From != playerState) { return; }
+        if (From != playerState) { return; }
         if (From.CanExit())
         {
             playerState.OnExit();
@@ -142,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void ChenckUpdate(PlayerState From, PlayerState To,bool CanGo)
+    public void ChenckUpdate(PlayerState From, PlayerState To, bool CanGo)
     {
         if (From != playerState) { return; }
         if (CanGo)
@@ -156,6 +156,17 @@ public class PlayerMovement : MonoBehaviour
     public void SetMovement(bool canMove)
     {
         playerState.canMove = canMove;
+    }
+
+    public void EndAnimationevent()
+    {
+        playerState.EndAnimationevent();
+    }
+
+
+    public bool GetMovement()
+    {
+        return playerState.canMove;
     }
 
     public void SetDirectionVisual(Vector3 vector3)
@@ -214,6 +225,18 @@ public class PlayerState
     }
 
     public virtual void OnExit()
+    {
+
+    }
+
+
+    public virtual void StartAnimationevent()
+    {
+
+    }
+
+
+    public virtual void EndAnimationevent()
     {
 
     }
@@ -310,7 +333,6 @@ public class Movemnt : PlayerState
         {
             canExit = MoundCheck();
             moveDirection.y = jumpSpeed;
-            SetAnimationJump(true);
             SetAnimationLand(false);
         }
         else
@@ -412,12 +434,11 @@ public class Movemnt : PlayerState
             bool hitFoword = Physics.Raycast(ray, out hithitFoword, 2f);
             if (hitFoword)
             {
-                Teleport();
                 return true;
             }
 
         }
-
+        SetAnimationJump(true);
         return false;
     }
 
@@ -425,13 +446,6 @@ public class Movemnt : PlayerState
     {
         if (!canMove) return false;
         return canExit;
-    }
-
-    private void Teleport()
-    {
-        characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y-0.3f, characterController.transform.position.z);
-        characterController.enabled = true;
     }
 
     public override void OnEnter()
@@ -460,6 +474,8 @@ public class Climbing : PlayerState
     RaycastHit hithitFoword;
 
     Transform orientacion;
+
+    Animator animator;
 
     Transform RHand;
     Transform RHandraycast;
@@ -498,8 +514,11 @@ public class Climbing : PlayerState
 
     private bool coner =false;
 
+    private bool moveToPosition = false;
+    private Vector3 StartPostion;
+
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
-    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid,Transform RHand, Transform RHandraycast, Transform LHand,Transform LHandraycast, Rig ArmsRig)
+    Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid,Transform RHand, Transform RHandraycast, Transform LHand,Transform LHandraycast, Rig ArmsRig,Animator animator)
     {
         this.walkingSpeed = walkingSpeed;
         this.runningSpeed = runningSpeed;
@@ -518,6 +537,7 @@ public class Climbing : PlayerState
         this.rotationX = rotationX;
         this.canMove = canMove;
         this.cameraYOffset = cameraYOffset;
+        this.animator = animator;
         this.playerCamera = playerCamera;
         this.orientacion = orientacion;
         this.mid = mid;
@@ -541,6 +561,9 @@ public class Climbing : PlayerState
 
     public override void Update()
     {
+        PostionLerp();
+        Debug.Log("canMove");
+        if (!canMove) return;
         bool isRunning = false;
         RhandPosition.transform.position = RHand.transform.position;
         Ray rayRightHand = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
@@ -699,7 +722,6 @@ public class Climbing : PlayerState
             if (hithitCorner.normal != lastFowordNormal)
             {
                 SaveTransform();
-                //Visual.transform.forward = hithitCorner.normal * -1;
                 Debug.Log(hithitCorner.normal);
                 tra.transform.forward = hithitCorner.normal * -1;
                 characterController.enabled = false;
@@ -723,10 +745,11 @@ public class Climbing : PlayerState
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }
+
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.3f, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.6f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
@@ -786,24 +809,55 @@ public class Climbing : PlayerState
 
     public override void OnEnter()
     {
-        ArmsRig.weight = 1.0f;
+        //StartAnimRig();
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
-        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y-0.2f, CornerCast.position.z);
-        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y-0.2f, FowordCast.position.z);
+        //Teleport();
+        StartPostion = characterController.transform.position;
+        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y - 0.2f, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 0.2f, FowordCast.position.z);
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
-        if(RightHand) RHandPos = RightHandhit.point;
+        if (RightHand) RHandPos = RightHandhit.point;
         Ray rayLightHant = new Ray(LHandraycast.transform.position, LHandraycast.up * -1);
         bool LightHand = Physics.Raycast(rayLightHant, out LightHandhit, 3f);
         if (LightHand) LHandPos = LightHandhit.point;
         lastFowordNormal = Vector3.zero;
         lastDownNormal = Vector3.zero;
+        //Visual.transform.SetParent(null);
+        moveToPosition = true;
+        canMove = false;
+        animator.SetBool("ISHoldingUp",true);
     }
 
+    private void PostionLerp()
+    {
+        if (!moveToPosition)
+        {
+            characterController.enabled = true;
+            return;
+        }
+        characterController.enabled = false;
+        characterController.transform.position = Vector3.Lerp(StartPostion, new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.3f, characterController.transform.position.z),50*Time.deltaTime);
+
+    }
+
+
+    public override void EndAnimationevent()
+    {
+        StartAnimRig();
+    }
+
+    public void StartAnimRig()
+    {
+        ArmsRig.weight = 1.0f;
+        moveToPosition = false;
+        canMove = true;
+    }
 
     public override void OnExit()
     {
         ArmsRig.weight = 0f;
+        moveToPosition = false;
     }
 }
 

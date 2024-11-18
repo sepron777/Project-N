@@ -3154,7 +3154,6 @@ MonoBehaviour:
   mid: {fileID: 1918951722}
   ArmsRig: {fileID: 290073546}
   RHand: {fileID: 1624916970}
-  RHandTipBone: {fileID: 1852576807101828299}
   RHandraycast: {fileID: 336585593}
   LHand: {fileID: 1956360598}
   LHandraycast: {fileID: 1333183582}
@@ -3985,6 +3984,7 @@ GameObject:
   - component: {fileID: 5866666021322346132}
   - component: {fileID: 5866666021322346131}
   - component: {fileID: 5866666021322346133}
+  - component: {fileID: 5866666021322346134}
   m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
@@ -5545,6 +5545,18 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47177f1c1aa9f5e478d58f829c49dfe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &5866666021322346134
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 919132148668583506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a81ec909ed5c8e94bb4a700a212113d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &5901452234742105707
