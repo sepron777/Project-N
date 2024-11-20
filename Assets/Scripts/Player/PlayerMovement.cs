@@ -749,7 +749,7 @@ public class Climbing : PlayerState
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.6f, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.2f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
@@ -837,7 +837,7 @@ public class Climbing : PlayerState
             return;
         }
         characterController.enabled = false;
-        characterController.transform.position = Vector3.Lerp(StartPostion, new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.3f, characterController.transform.position.z),50*Time.deltaTime);
+        characterController.transform.position = Vector3.Lerp(StartPostion, new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.2f, characterController.transform.position.z),50*Time.deltaTime);
 
     }
 
