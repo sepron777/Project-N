@@ -573,7 +573,7 @@ public class Climbing : PlayerState
         {
             if (Vector3.Distance(RhandPosition.transform.position, RightHandhit.point) > RHandDistance && !isMovingLHand)
             {
-                RHand.transform.localEulerAngles = new Vector3(90, -90, -90);
+                RHand.transform.up = Visual.transform.forward;
                 startPositionRHand = RhandPosition.transform.position;
                 endPositionRHand = RightHandhit.point;
                 isMovingRHand = true;
@@ -620,7 +620,7 @@ public class Climbing : PlayerState
         {
             if (Vector3.Distance(LhandPosition.transform.position, LightHandhit.point) > LHandDistance && !isMovingRHand)
             {
-                LHand.transform.localEulerAngles = new Vector3(90, -90, -90);
+                LHand.transform.up = Visual.transform.forward;
                 startPositionLHand = LhandPosition.transform.position;
                 endPositionLHand = LightHandhit.point;
                 isMovingLHand = true;
@@ -813,8 +813,7 @@ public class Climbing : PlayerState
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
         //Teleport();
         StartPostion = characterController.transform.position;
-        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y - 0.2f, CornerCast.position.z);
-        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 0.2f, FowordCast.position.z);
+
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
         if (RightHand) RHandPos = RightHandhit.point;
@@ -834,6 +833,7 @@ public class Climbing : PlayerState
         if (!moveToPosition)
         {
             characterController.enabled = true;
+            ArmsRig.weight = 1.0f;
             return;
         }
         characterController.enabled = false;
@@ -849,15 +849,19 @@ public class Climbing : PlayerState
 
     public void StartAnimRig()
     {
-        ArmsRig.weight = 1.0f;
+        Visual.transform.localPosition = new Vector3(Visual.transform.localPosition.x,0, Visual.transform.localPosition.y);
+        this.CornerCast.position = new Vector3(CornerCast.position.x, hithitDown.point.y - 0.2f, CornerCast.position.z);
+        this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 0.2f, FowordCast.position.z);
         moveToPosition = false;
         canMove = true;
+        Debug.Log("fsfsdf");
     }
 
     public override void OnExit()
     {
         ArmsRig.weight = 0f;
         moveToPosition = false;
+        animator.SetBool("ISHoldingUp", false);
     }
 }
 
