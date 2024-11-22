@@ -749,7 +749,7 @@ public class Climbing : PlayerState
     private void Teleport()
     {
         characterController.enabled = false;
-        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.2f, characterController.transform.position.z);
+        characterController.transform.position = new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.15f, characterController.transform.position.z);
         characterController.enabled = true;
     }
 
@@ -769,27 +769,32 @@ public class Climbing : PlayerState
     private float Yaxis()
     {
         float y = orientacion.eulerAngles.y; 
-        Debug.Log(y);
         if (y < 1 ||y>180)
         {
             return -1;
         }
         return 1;
     }
+    bool ExitAnim =false;
 
+    Vector3 StartPos;
+    Vector3 MidPos;
+    Vector3 EndPos;
+    float timerPassedExitState;
     public override bool CanExit()
     {
-        if (!canMove && coner) return false;
+        if (coner) return false;
         if (inputAction.ReadValue<Vector2>().y > 0 && Input.GetKeyDown(KeyCode.Space))
         {
             Ray ray = new Ray(raycastDown.transform.position, raycastDown.transform.up * -1);
             bool down = Physics.Raycast(ray, out hithitDown, 3f);
             if (down)
             {
+                StartPos = characterController.transform.position;
+                EndPos = hithitDown.point + new Vector3(0,1,0);
+                MidPos = (StartPos+ EndPos) / 2;
                 characterController.enabled = false;
-                characterController.transform.position = hithitDown.point+ new Vector3(0,3,0);
-                characterController.enabled = true;
-                return true;
+                ExitAnim = true;
             }
         }
         else if (inputAction.ReadValue<Vector2>().y < 0 && Input.GetKeyDown(KeyCode.Space))
@@ -798,22 +803,46 @@ public class Climbing : PlayerState
             bool down = Physics.Raycast(ray,out hithitDown,3f);
             if(down)
             {
-                characterController.enabled = false;
-                characterController.transform.position = hithitDown.point;
-                characterController.enabled = true;
                 return true;
             }
+        }
+        if(!canMove) return false;
+        return CanExitState();
+    }
+
+    public bool CanExitState()
+    {
+        if(!ExitAnim) return false;
+        timerPassedExitState += Time.deltaTime * speed;
+
+        // Calculate the percentage of progress (from 0 to 1)
+        float t = Mathf.Clamp01(timerPassedExitState);
+
+        // Calculate the Bezier curve position
+        Vector3 bezierPosition = Mathf.Pow(1 - t, 2) * StartPos
+                                 + 2 * (1 - t) * t * MidPos
+                                 + Mathf.Pow(t, 2) * EndPos;
+
+        // Move the character along the curve
+        characterController.transform.position = bezierPosition;
+
+        if (t >= 1.0f)
+        {
+            timerPassedExitState = 0.0f; // Reset for looping or another curve
+            characterController.enabled = true;
+            ExitAnim = false;
+            return true;
         }
         return false;
     }
 
     public override void OnEnter()
     {
+        ExitAnim = false;
         //StartAnimRig();
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
         //Teleport();
         StartPostion = characterController.transform.position;
-
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
         if (RightHand) RHandPos = RightHandhit.point;
@@ -837,7 +866,7 @@ public class Climbing : PlayerState
             return;
         }
         characterController.enabled = false;
-        characterController.transform.position = Vector3.Lerp(StartPostion, new Vector3(characterController.transform.position.x, hithitDown.point.y - 0.2f, characterController.transform.position.z),50*Time.deltaTime);
+        characterController.transform.position = Vector3.Lerp(StartPostion, new Vector3(StartPostion.x, hithitDown.point.y + 0.3f, StartPostion.z), Time.deltaTime);
 
     }
 
@@ -854,7 +883,6 @@ public class Climbing : PlayerState
         this.FowordCast.position = new Vector3(FowordCast.position.x, hithitDown.point.y - 0.2f, FowordCast.position.z);
         moveToPosition = false;
         canMove = true;
-        Debug.Log("fsfsdf");
     }
 
     public override void OnExit()
