@@ -583,6 +583,8 @@ public class Climbing : PlayerState
             {
                 RHand.transform.position = RHandPos;
             }
+
+            RHand.transform.position = new Vector3(RHand.transform.position.x, RightHandhit.point.y, RHand.transform.position.z);
         }
 
         // If moving, proceed with the arc motion
@@ -630,6 +632,7 @@ public class Climbing : PlayerState
             {
                 LHand.transform.position = LHandPos;
             }
+            LHand.transform.position = new Vector3(LHand.transform.position.x, LightHandhit.point.y, LHand.transform.position.z);
         }
 
         // If moving, proceed with the arc motion
