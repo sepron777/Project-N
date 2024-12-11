@@ -1026,11 +1026,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 741609892}
-  dehpSub: 100
-  displacementAnt: 100
+  dehpSub: 1
+  displacementAnt: 3
   floaters: 4
-  waterDrag: 100
-  waterAngularDrag: 100
+  waterDrag: 1
+  waterAngularDrag: 1
   waterSurface: {fileID: 1402369352}
 --- !u!1 &474018552
 GameObject:
@@ -1699,11 +1699,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 741609892}
-  dehpSub: 100
-  displacementAnt: 100
+  dehpSub: 1
+  displacementAnt: 3
   floaters: 4
-  waterDrag: 100
-  waterAngularDrag: 100
+  waterDrag: 1
+  waterAngularDrag: 1
   waterSurface: {fileID: 1402369352}
 --- !u!1 &642049383
 GameObject:
@@ -1750,11 +1750,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 741609892}
-  dehpSub: 100
-  displacementAnt: 100
+  dehpSub: 1
+  displacementAnt: 3
   floaters: 4
-  waterDrag: 100
-  waterAngularDrag: 100
+  waterDrag: 1
+  waterAngularDrag: 1
   waterSurface: {fileID: 1402369352}
 --- !u!1 &686325899
 GameObject:
@@ -1801,11 +1801,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 741609892}
-  dehpSub: 100
-  displacementAnt: 100
+  dehpSub: 1
+  displacementAnt: 3
   floaters: 4
-  waterDrag: 100
-  waterAngularDrag: 100
+  waterDrag: 1
+  waterAngularDrag: 1
   waterSurface: {fileID: 1402369352}
 --- !u!1 &693223715
 GameObject:
