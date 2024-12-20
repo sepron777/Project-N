@@ -1,11 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.EventSystems.EventTrigger;
+using UnityEngine.TestTools;
 
 public class Enemy : MonoBehaviour
 {
     public NavMeshAgent meshAgent;
     public Transform player;
+    public float coneAngle;
+    public float coneRange;
+    public LayerMask layerMask;
 
     public List<Transform> Waypoints;
 
@@ -25,17 +30,41 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         m_EnemyBase.Update();
+        ChenckUpdate(StacionaryState, chaseState, SeePlayer());
+        ChenckUpdate(chaseState, StacionaryState, !SeePlayer());
     }
 
     public void ChenckUpdate(EnemyBase From, EnemyBase To, bool CanGo)
     {
-        if (From != m_EnemyBase) { return; }
+        if (From != m_EnemyBase)  return; 
         if (CanGo)
         {
             m_EnemyBase.OnExit();
             m_EnemyBase = To;
             m_EnemyBase.OnEnter();
         }
+    }
+
+    private bool SeePlayer()
+    {
+        Vector3 direction = (player.transform.position - transform.position).normalized;
+        float angleY = Vector3.SignedAngle(transform.transform.forward, direction, Vector3.up);
+        float angleZ = Vector3.SignedAngle(transform.transform.forward, direction, Vector3.right);
+        if ((angleY < coneAngle / 2 && angleY > -coneAngle / 2) && (angleZ < coneAngle / 2 && angleZ > -coneAngle / 2))
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, direction, out hit, coneRange, layerMask))
+            {
+                //only works for player detecion for now idk if it works for enemies
+                if (hit.collider.gameObject == player.transform.gameObject)
+                {
+                    Debug.DrawRay(transform.transform.position, direction * coneRange, Color.green);
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
     }
 }
 

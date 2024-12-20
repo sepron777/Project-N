@@ -644,6 +644,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshAgent: {fileID: 224709856}
   player: {fileID: 1671861970}
+  coneAngle: 45
+  coneRange: 10
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 9
   Waypoints:
   - {fileID: 2088899181}
   - {fileID: 1569823484}
