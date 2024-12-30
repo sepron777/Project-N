@@ -3,29 +3,32 @@ using UnityEngine.Rendering.HighDefinition;
 
 public class Floater : MonoBehaviour
 {
-    public Rigidbody rb;
-    public float dehpSub;
-    public float displacementAnt;
-    public int floaters;
-    public float waterDrag;
-    public float waterAngularDrag;
+    [SerializeField] private Rigidbody rb;
+
+    public float depthBeforeSubmerged = 1;
+    public float displacementAmount = 3;
+    public int floaterCount = 1;
+
+    public Transform waterLevel;
     public WaterSurface waterSurface;
     WaterSearchParameters waterSpectrumParameters;
     WaterSearchResult waterSearchResult;
+
+    public float waterDrag = 0.99f;
+    public float waterAngularDrag = 0.5f;
+
     private void FixedUpdate()
     {
-        rb.AddForceAtPosition(Physics.gravity/floaters, transform.position,ForceMode.Acceleration);
-
+        rb.AddForceAtPosition(Physics.gravity / floaterCount, transform.position, ForceMode.Acceleration);
         waterSpectrumParameters.startPositionWS = transform.position;
-
-        waterSurface.ProjectPointOnWaterSurface(waterSpectrumParameters,out waterSearchResult);
-
-        if (transform.position.y< waterSearchResult.projectedPositionWS.y)
+        waterSurface.ProjectPointOnWaterSurface(waterSpectrumParameters, out waterSearchResult);
+        float height = waterSearchResult.projectedPositionWS.y;
+        if (transform.position.y < height)
         {
-            float dispacement = Mathf.Clamp01(waterSearchResult.projectedPositionWS.y-transform.position.y/dehpSub)* displacementAnt;
-            rb.AddForceAtPosition(new Vector3(0,Mathf.Abs(Physics.gravity.y)*dispacement,0),transform.position,ForceMode.Acceleration);
-            rb.AddForce(dispacement*-rb.linearVelocity*waterDrag*Time.fixedDeltaTime,ForceMode.VelocityChange);
-            rb.AddTorque(dispacement * -rb.linearVelocity * waterAngularDrag*Time.fixedDeltaTime,ForceMode.VelocityChange);
+            float displacementMultiplier = Mathf.Clamp01((height - transform.position.y) / depthBeforeSubmerged) * displacementAmount;
+            rb.AddForceAtPosition(new Vector3(0f, Mathf.Abs(Physics.gravity.y) * displacementMultiplier, 0f), transform.position, ForceMode.Acceleration);
+            rb.AddForce(displacementMultiplier * -rb.linearVelocity * waterDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
+            rb.AddTorque(displacementMultiplier * -rb.angularVelocity * waterAngularDrag * Time.fixedDeltaTime, ForceMode.VelocityChange);
         }
     }
 }
