@@ -1,13 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-using static UnityEngine.EventSystems.EventTrigger;
-using UnityEngine.TestTools;
 
 public class Enemy : MonoBehaviour
 {
     public NavMeshAgent meshAgent;
     public Transform player;
+    public Transform Wheel;
     public float coneAngle;
     public float coneRange;
     public LayerMask layerMask;
@@ -17,6 +16,7 @@ public class Enemy : MonoBehaviour
     private EnemyBase m_EnemyBase;
     private StacionaryState StacionaryState;
     private ChaseState chaseState;
+    float x = 0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,6 +32,8 @@ public class Enemy : MonoBehaviour
         m_EnemyBase.Update();
         ChenckUpdate(StacionaryState, chaseState, SeePlayer());
         ChenckUpdate(chaseState, StacionaryState, !SeePlayer());
+        x += meshAgent.velocity.magnitude;
+        Wheel.transform.localEulerAngles = new Vector3(x, Wheel.transform.localEulerAngles.y, Wheel.transform.localEulerAngles.z);
     }
 
     public void ChenckUpdate(EnemyBase From, EnemyBase To, bool CanGo)
