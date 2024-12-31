@@ -16,7 +16,6 @@ public class Enemy : MonoBehaviour
     private EnemyBase m_EnemyBase;
     private StacionaryState StacionaryState;
     private ChaseState chaseState;
-    float x = 0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -32,8 +31,12 @@ public class Enemy : MonoBehaviour
         m_EnemyBase.Update();
         ChenckUpdate(StacionaryState, chaseState, SeePlayer());
         ChenckUpdate(chaseState, StacionaryState, !SeePlayer());
-        x += meshAgent.velocity.magnitude;
-        Wheel.transform.localEulerAngles = new Vector3(x, Wheel.transform.localEulerAngles.y, Wheel.transform.localEulerAngles.z);
+
+    }
+
+    private void FixedUpdate()
+    {
+        Wheel.Rotate(meshAgent.velocity.magnitude, 0, 0,Space.Self);
     }
 
     public void ChenckUpdate(EnemyBase From, EnemyBase To, bool CanGo)
