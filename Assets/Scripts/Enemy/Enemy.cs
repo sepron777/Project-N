@@ -16,12 +16,14 @@ public class Enemy : MonoBehaviour
     private EnemyBase m_EnemyBase;
     private StacionaryState StacionaryState;
     private ChaseState chaseState;
+    private LostState lostState;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         chaseState = new ChaseState(transform, meshAgent, player);
         StacionaryState = new StacionaryState(transform, meshAgent, Waypoints);
+        lostState = new LostState(transform, meshAgent, player);
         m_EnemyBase = StacionaryState;
         m_EnemyBase.OnEnter();
     }
@@ -30,8 +32,9 @@ public class Enemy : MonoBehaviour
     {
         m_EnemyBase.Update();
         ChenckUpdate(StacionaryState, chaseState, SeePlayer());
-        ChenckUpdate(chaseState, StacionaryState, !SeePlayer());
-
+        ChenckUpdate(chaseState, lostState, !SeePlayer());
+        ChenckUpdate(lostState, chaseState, SeePlayer());
+        ChenckUpdate(lostState, StacionaryState, lostState.Get_returToStacionaryState());
     }
 
     private void FixedUpdate()
@@ -159,6 +162,46 @@ public class StacionaryState : EnemyBase
         }
          index++;
         meshAgent.SetDestination(Waypoints[index].position);
+    }
+
+    public override void OnExit()
+    {
+        base.OnExit();
+    }
+}
+
+public class LostState : EnemyBase
+{
+    float? timer;
+    public bool returToStacionaryState = false;
+    private Transform Player;
+    public LostState(Transform enemy, NavMeshAgent navMeshAgent,Transform Player)
+    {
+        this.Enemy = enemy;
+        this.meshAgent = navMeshAgent;
+        this.Player = Player;
+    }
+
+    public override void OnEnter()
+    {
+        base.OnEnter();
+        returToStacionaryState = false;
+        timer = 0;
+    }
+
+    public override void Update()
+    {
+        base.Update();
+        meshAgent.SetDestination(Player.position);
+        timer += Time.deltaTime;
+        if (timer > 3) {
+            returToStacionaryState = true;
+        }
+    }
+
+    public bool Get_returToStacionaryState()
+    {
+        return returToStacionaryState;
     }
 
     public override void OnExit()
