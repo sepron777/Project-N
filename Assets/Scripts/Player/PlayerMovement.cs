@@ -573,7 +573,7 @@ public class Climbing : PlayerState
         {
             if (Vector3.Distance(RhandPosition.transform.position, RightHandhit.point) > RHandDistance && !isMovingLHand)
             {
-                RHand.transform.up = Visual.transform.forward;
+                RHand.transform.localEulerAngles = new Vector3(90,0,0);
                 startPositionRHand = RhandPosition.transform.position;
                 endPositionRHand = RightHandhit.point;
                 isMovingRHand = true;
@@ -622,7 +622,7 @@ public class Climbing : PlayerState
         {
             if (Vector3.Distance(LhandPosition.transform.position, LightHandhit.point) > LHandDistance && !isMovingRHand)
             {
-                LHand.transform.up = Visual.transform.forward;
+                LHand.transform.localEulerAngles = new Vector3(90, 0, 0);
                 startPositionLHand = LhandPosition.transform.position;
                 endPositionLHand = LightHandhit.point;
                 isMovingLHand = true;
@@ -870,7 +870,9 @@ public class Climbing : PlayerState
         if (LightHand) LHandPos = LightHandhit.point;
         lastFowordNormal = Vector3.zero;
         lastDownNormal = Vector3.zero;
-        //Visual.transform.SetParent(null);
+        Ray ray2 = new Ray(FowordCast.transform.position, FowordCast.forward);
+        Physics.Raycast(ray2, out hithitFoword, 0.4f);
+        Visual.forward = hithitFoword.normal*-1;
         moveToPosition = true;
         canMove = false;
         animator.SetBool("ISHoldingUp",true);
