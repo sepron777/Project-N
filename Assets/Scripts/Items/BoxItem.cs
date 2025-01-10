@@ -6,6 +6,8 @@ using static UnityEditor.Progress;
 
 public class BoxItem : ItemBase
 {
+    [RequiredField]
+    public Transform dsfsa;
     public override void Grab(Inventory inventory, Transform PickUpSpot)
     {
         base.Grab(inventory, PickUpSpot);
