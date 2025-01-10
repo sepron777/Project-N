@@ -946,7 +946,6 @@ MonoBehaviour:
   weight: 5
   AnimationLayerInProgress: 1
   controller: {fileID: 22100000, guid: 407fc27f733d4ab46b58428b9b815d55, type: 2}
-  dsfsa: {fileID: 0}
 --- !u!54 &352354414
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3736,7 +3735,6 @@ MonoBehaviour:
   weight: 5
   AnimationLayerInProgress: 0
   controller: {fileID: 22100000, guid: b223f209f57470945a45170ad3a3f737, type: 2}
-  dsfsa: {fileID: 0}
 --- !u!1 &1483392380
 GameObject:
   m_ObjectHideFlags: 0

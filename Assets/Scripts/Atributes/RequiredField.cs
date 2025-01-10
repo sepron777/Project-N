@@ -32,37 +32,37 @@ public class PropertyWarningEditor : PropertyDrawer
     }
 }
 
+[InitializeOnLoad]
 public static class RequiredFieldValid
 {
     static RequiredFieldValid()
     {
         EditorApplication.playModeStateChanged += (state) =>
         {
-            if (state  == PlayModeStateChange.ExitingEditMode)
+            if (state == PlayModeStateChange.ExitingEditMode)
             {
-                Debug.Log("dd");
                 DebugWarning();
             }
         };
     }
     private static void DebugWarning()
     {
-        bool canPuse  = false;
+        bool canPuse = false;
         MonoBehaviour[] mb = GameObject.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
         foreach (MonoBehaviour mb2 in mb)
         {
-            FieldInfo[] fieldInfo = mb2.GetType().GetFields(BindingFlags.Instance |BindingFlags.NonPublic |BindingFlags.Public);
+            FieldInfo[] fieldInfo = mb2.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
             foreach (FieldInfo fieldInfo2 in fieldInfo)
             {
                 RequiredField requiredField = fieldInfo2.GetCustomAttribute<RequiredField>();
-                if (requiredField !=null)
+                if (requiredField != null)
                 {
                     object fliadValue = fieldInfo2.GetValue(mb2);
-                    if(fliadValue.Equals(null) && requiredField.warningType == WarningType.Error) 
+                    if (fliadValue.Equals(null) && requiredField.warningType == WarningType.Error)
                     {
-                        Debug.Log($"The field {fieldInfo2.Name} is required in {mb2.gameObject.name} ", mb2);
+                        Debug.LogError($"The field {fieldInfo2.Name} is required in {mb2.gameObject.name} ", mb2);
                         canPuse = true;
-                    }   
+                    }
                 }
             }
         }
