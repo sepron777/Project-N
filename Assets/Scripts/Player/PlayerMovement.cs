@@ -379,7 +379,7 @@ public class Movemnt : PlayerState
         else
         {
             //animator.SetFloat("Value", 0, 0.05f, Time.deltaTime);
-            SetAnimatorMovemnt2D(0, 0.5f);
+            SetAnimatorMovemnt2D(0, 0f);
         }
 
         if (dir.magnitude >= 0.1f && canMove)
