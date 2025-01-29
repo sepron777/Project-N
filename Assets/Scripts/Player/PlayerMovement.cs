@@ -429,7 +429,7 @@ public class Movemnt : PlayerState
         bool hitDown = Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 1.5f);
         if (hitDown)
         {
-            raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y-0.5f, raycastFoword.transform.position.z);
+            raycastFoword.transform.position = new Vector3(raycastFoword.transform.position.x, hithitDown.point.y-0.2f, raycastFoword.transform.position.z);
             Ray ray = new Ray(raycastFoword.transform.position, raycastFoword.transform.forward);
             bool hitFoword = Physics.Raycast(ray, out hithitFoword, 2f);
             if (hitFoword)
@@ -862,6 +862,8 @@ public class Climbing : PlayerState
         Physics.Raycast(raycastDown.position, raycastDown.up * -1, out hithitDown, 3f);
         //Teleport();
         StartPostion = characterController.transform.position;
+        RHandraycast.transform.localPosition = new Vector3(RHandraycast.transform.localPosition.x, RHandraycast.transform.localPosition.y, raycastDown.localPosition.z);
+        LHandraycast.transform.localPosition = new Vector3(LHandraycast.transform.localPosition.x, LHandraycast.transform.localPosition.y, raycastDown.localPosition.z);
         Ray rayRightHant = new Ray(RHandraycast.transform.position, RHandraycast.up * -1);
         bool RightHand = Physics.Raycast(rayRightHant, out RightHandhit, 3f);
         if (RightHand) RHandPos = RightHandhit.point;
@@ -913,7 +915,7 @@ public class Climbing : PlayerState
         animator.SetBool("ISHoldingUp", false);
     }
 }
-
+//not usable
 public class WallClimbing : PlayerState
 {
     private bool canExit;
