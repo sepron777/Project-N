@@ -515,6 +515,7 @@ public class Climbing : PlayerState
     private bool coner =false;
 
     private bool moveToPosition = false;
+    private Vector3 obsticalPosion = new Vector3(0,0,0);
     private Vector3 StartPostion;
 
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
@@ -562,7 +563,6 @@ public class Climbing : PlayerState
     public override void Update()
     {
         PostionLerp();
-        Debug.Log("canMove");
         if (!canMove) return;
         bool isRunning = false;
         RhandPosition.transform.position = RHand.transform.position;
@@ -737,7 +737,7 @@ public class Climbing : PlayerState
         }
         else if (hitcorner)
         {
-            if (hithitCorner.normal != lastFowordNormal)
+            if ((hithitCorner.normal != lastFowordNormal) && (!hithitCorner.collider.CompareTag("obstical")))
             {
                 SaveTransform();
                 Debug.Log(hithitCorner.normal);
@@ -746,6 +746,11 @@ public class Climbing : PlayerState
                 coner = true;
                 orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitCorner.normal;
+            }
+            if(hithitCorner.collider.CompareTag("obstical"))
+            {
+                obsticalPosion = hithitCorner.point;
+                Debug.Log("ide");
             }
         }
 
@@ -760,7 +765,9 @@ public class Climbing : PlayerState
             Teleport();
             // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
-
+        //nefungiren
+        Vector3 futurePos = characterController.transform.position + moveDirection;
+        if(Vector3.Distance(obsticalPosion, characterController.transform.position)< Vector3.Distance(obsticalPosion, futurePos) && (obsticalPosion != Vector3.zero))return;
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }

@@ -9,7 +9,6 @@ public class Floater : MonoBehaviour
     public float displacementAmount = 3;
     public int floaterCount = 1;
 
-    public Transform waterLevel;
     public WaterSurface waterSurface;
     WaterSearchParameters waterSpectrumParameters;
     WaterSearchResult waterSearchResult;
