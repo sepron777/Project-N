@@ -750,7 +750,6 @@ public class Climbing : PlayerState
             if(hithitCorner.collider.CompareTag("obstical"))
             {
                 obsticalPosion = hithitCorner.point;
-                Debug.Log("ide");
             }
         }
 
@@ -765,9 +764,18 @@ public class Climbing : PlayerState
             Teleport();
             // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
-        //nefungiren
-        Vector3 futurePos = characterController.transform.position + moveDirection;
-        if(Vector3.Distance(obsticalPosion, characterController.transform.position)< Vector3.Distance(obsticalPosion, futurePos) && (obsticalPosion != Vector3.zero))return;
+
+        //funguje
+        Vector3 futurePos = characterController.transform.position + moveDirection*0.2f;
+        Debug.Log(futurePos);
+        if (obsticalPosion != Vector3.zero)
+        {
+            if(Vector3.Distance(obsticalPosion, futurePos) < (Vector3.Distance(obsticalPosion, characterController.transform.position)))
+            {
+                obsticalPosion = Vector3.zero;
+                return;
+            }
+        }
         // Move the controller
         characterController.Move(moveDirection * Time.deltaTime);
     }

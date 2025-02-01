@@ -2434,7 +2434,7 @@ GameObject:
   - component: {fileID: 935754501}
   - component: {fileID: 935754502}
   m_Layer: 0
-  m_Name: collider (1)
+  m_Name: zabrana
   m_TagString: obstical
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
