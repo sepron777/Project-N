@@ -11,6 +11,7 @@ using UnityEngine.InputSystem.Processors;
 using UnityEngine.AI;
 using UnityEngine.XR;
 using UnityEngine.Animations.Rigging;
+using NUnit.Framework.Internal;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -90,8 +91,7 @@ public class PlayerMovement : MonoBehaviour
         WallClimbing = new WallClimbing(this.gameObject, walkingSpeed, runningSpeed, jumpSpeed, gravity, trunSmoothVeleocity, smoothTime, visor, raycastDown, raycastFoword,
          Visual, MoveInput, InteractInput, walting, characterController, moveDirection, rotationX, canMove, cameraYOffset, playerCamera, PickUpSpot);
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+
 
         playerState = Movement;
     }
@@ -358,7 +358,13 @@ public class Movemnt : PlayerState
                 SetAnimationCrouch(crouch);
                 if (crouch)
                 {
-                    //something here
+                    characterController.height = 1.2f;
+                    Visual.transform.localPosition = new Vector3(Visual.transform.localPosition.x, 0.383f, Visual.transform.localPosition.z);
+                }
+                else
+                {
+                    characterController.height = 2;
+                    Visual.transform.localPosition =Vector3.zero;
                 }
             }
             SetAnimationFalling(false);
@@ -517,6 +523,7 @@ public class Climbing : PlayerState
     private bool moveToPosition = false;
     private Vector3 obsticalPosion = new Vector3(0,0,0);
     private Vector3 StartPostion;
+    private GameObject test;
 
     public Climbing(float walkingSpeed, float runningSpeed, float jumpSpeed, float gravity, float trunSmoothVeleocity, float smoothTime, GameObject visor, Transform raycastDown, Transform CornerCast, Transform FowordCast,
     Transform Visual, InputAction playerInput, bool walting, CharacterController characterController, Vector3 moveDirection, float rotationX, bool canMove, float cameraYOffset, Camera playerCamera, Transform orientacion,Transform mid,Transform RHand, Transform RHandraycast, Transform LHand,Transform LHandraycast, Rig ArmsRig,Animator animator)
@@ -552,6 +559,8 @@ public class Climbing : PlayerState
         RhandPosition.name = "RightHandRealTimePostion";
         LhandPosition = new GameObject();
         LhandPosition.name = "LeftHandRealTimePostion";
+        test = new GameObject();
+        test.name = "test";
         this.walkingSpeed = 1;
     }
 
@@ -737,6 +746,11 @@ public class Climbing : PlayerState
         }
         else if (hitcorner)
         {
+            if (hithitCorner.collider.CompareTag("obstical"))
+            {
+                obsticalPosion = hithitCorner.point;
+                Debug.Log("adsdssd");
+            }
             if ((hithitCorner.normal != lastFowordNormal) && (!hithitCorner.collider.CompareTag("obstical")))
             {
                 SaveTransform();
@@ -746,10 +760,6 @@ public class Climbing : PlayerState
                 coner = true;
                 orientacion.eulerAngles = new Vector3(0, tra.transform.eulerAngles.y, Vector2.Angle(characterController.transform.up, hithitDown.normal));
                 lastFowordNormal = hithitCorner.normal;
-            }
-            if(hithitCorner.collider.CompareTag("obstical"))
-            {
-                obsticalPosion = hithitCorner.point;
             }
         }
 
@@ -766,8 +776,9 @@ public class Climbing : PlayerState
         }
 
         //funguje
-        Vector3 futurePos = characterController.transform.position + moveDirection*0.2f;
-        Debug.Log(futurePos);
+        Vector3 futurePos = (characterController.transform.position + moveDirection*0.2f)+Visual.transform.forward*0.3f;
+        test.transform.position = futurePos;
+        //Debug.Log(futurePos);
         if (obsticalPosion != Vector3.zero)
         {
             if(Vector3.Distance(obsticalPosion, futurePos) < (Vector3.Distance(obsticalPosion, characterController.transform.position)))

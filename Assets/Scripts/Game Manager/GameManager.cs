@@ -1,5 +1,6 @@
 using Cinemachine;
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,11 +8,14 @@ public class GameManager : MonoBehaviour
 {
     public PlayerMovement Player;
     public CinemachineVirtualCamera VirtualCamera;
+    public GameObject menu;
     public RawImage rawImage;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Player.SetMovement(false);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     [ContextMenu("startGame")]
@@ -22,6 +26,9 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartFadeOutCor()
     {
+        menu.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         while (rawImage.color.a < 1)
         {
             rawImage.color = new Color(rawImage.color.r, rawImage.color.g, rawImage.color.b, rawImage.color.a + 0.1f);
