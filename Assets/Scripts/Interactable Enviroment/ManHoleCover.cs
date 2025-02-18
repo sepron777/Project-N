@@ -12,18 +12,8 @@ using static UnityEngine.Rendering.DebugUI;
 public class ManHoleCover : MonoBehaviour
 {
     public Transform Point;
+    public Transform cover;
     private PlayerMovement player;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     public void Interact(GameObject Player)
     {
@@ -65,6 +55,14 @@ public class ManHoleCover : MonoBehaviour
             Debug.Log(dir.magnitude);
             yield return new WaitForFixedUpdate();
         }
+
+        float y = cover.position.y + 1;
+        while (cover.position.y<y)
+        {
+            cover.position = new Vector3(cover.position.x, cover.position.y+0.01f, cover.position.z);
+            yield return new WaitForFixedUpdate();
+        }
+
         player.SetMovement(true);
     }
 

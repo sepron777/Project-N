@@ -65,7 +65,6 @@ public class Inventory : MonoBehaviour
     IEnumerator Animation(float Weight,bool withAnimation,string AnimationLayer)
     {
         float diffrance = (animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer)) < Weight ? 0.1f : -0.1f);
-        Debug.Log(diffrance);
         while (diffrance== 0.1f? animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer))<= Weight: animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer)) >= Weight && withAnimation)
         {
             animator.SetLayerWeight(animator.GetLayerIndex(AnimationLayer), animator.GetLayerWeight(animator.GetLayerIndex(AnimationLayer))+diffrance);
@@ -78,7 +77,6 @@ public class Inventory : MonoBehaviour
             }
             yield return new WaitForFixedUpdate();
         }
-        Debug.Log("finish");
         canInteract = true;
     }
 

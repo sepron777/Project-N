@@ -97,7 +97,6 @@ public class PlayerMovement : MonoBehaviour
         playerState.Update();
         ChenckUpdate(Movement, Climbing);
         ChenckUpdate(Climbing, Movement);
-        // Debug.Log(playerState);
     }
 
     private bool CanClimb()
@@ -555,8 +554,9 @@ public class Climbing : PlayerState
         RhandPosition.name = "RightHandRealTimePostion";
         LhandPosition = new GameObject();
         LhandPosition.name = "LeftHandRealTimePostion";
+        /*
         test = new GameObject();
-        test.name = "test";
+        test.name = "test";*/
         this.walkingSpeed = 1;
     }
 
@@ -745,12 +745,10 @@ public class Climbing : PlayerState
             if (hithitCorner.collider.CompareTag("obstical"))
             {
                 obsticalPosion = hithitCorner.point;
-                Debug.Log("adsdssd");
             }
             if ((hithitCorner.normal != lastFowordNormal) && (!hithitCorner.collider.CompareTag("obstical")))
             {
                 SaveTransform();
-                Debug.Log(hithitCorner.normal);
                 tra.transform.forward = hithitCorner.normal * -1;
                 characterController.enabled = false;
                 coner = true;
@@ -768,13 +766,11 @@ public class Climbing : PlayerState
 
             }
             Teleport();
-            // Debug.Log(Vector2.Angle(characterController.transform.up, hithitDown.normal));
         }
 
         //funguje
         Vector3 futurePos = (characterController.transform.position + moveDirection*0.2f)+Visual.transform.forward*0.3f;
-        test.transform.position = futurePos;
-        //Debug.Log(futurePos);
+        //test.transform.position = futurePos;
         if (obsticalPosion != Vector3.zero)
         {
             if(Vector3.Distance(obsticalPosion, futurePos) < (Vector3.Distance(obsticalPosion, characterController.transform.position)))
@@ -896,11 +892,13 @@ public class Climbing : PlayerState
         lastDownNormal = Vector3.zero;
         Ray ray2 = new Ray(movementFoward.transform.position, movementFoward.forward);
         Physics.Raycast(ray2, out hithitFoword, 0.4f);
+        /*
         GameObject gm = new GameObject();
         gm.transform.position = hithitFoword.point;
         gm.transform.forward = hithitFoword.normal*-1;
         Debug.DrawRay(movementFoward.transform.position, movementFoward.forward*5,Color.blue,20);
-        Debug.Log(hithitFoword.collider.name);
+        Debug.Log(hithitFoword.collider.name);*/
+
         Visual.forward = hithitFoword.normal*-1;
         moveToPosition = true;
         canMove = false;
