@@ -9,7 +9,6 @@ public class GameManager : MonoBehaviour
     public CinemachineVirtualCamera VirtualCamera;
     public GameObject menu;
     public RawImage rawImage;
-    [RequiredField]
     public Transform startPos;
     public static GameManager instance;
 

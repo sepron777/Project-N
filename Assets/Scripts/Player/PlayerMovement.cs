@@ -62,7 +62,7 @@ public class PlayerMovement : MonoBehaviour
     private Camera playerCamera;
 
     private bool Rope = false;
-
+    [HideInInspector]
     public Inventory inventory;
     [HideInInspector]
     public Animator animator;

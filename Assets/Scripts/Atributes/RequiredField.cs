@@ -1,9 +1,12 @@
 using System;
 using System.Reflection;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using static RequiredField;
 
+#if UNITY_EDITOR
 [AttributeUsage(AttributeTargets.Field)]
 public class RequiredField : PropertyAttribute
 {
@@ -74,3 +77,4 @@ public static class RequiredFieldValid
         }
     }
 }
+#endif

@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class Ladder : MonoBehaviour
 {
-    [RequiredField]
     public Transform endPoint;
 
     public void interacted(GameObject Player)
