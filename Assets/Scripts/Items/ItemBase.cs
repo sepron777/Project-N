@@ -20,7 +20,7 @@ public class ItemBase : MonoBehaviour, IInteractable , IAnimation, IUse
     // Start is called before the first frame update
     public virtual void Start()
     {
-        Debug.Log(Name);
+
     }
 
     // Update is called once per frame
